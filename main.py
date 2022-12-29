@@ -1,4 +1,3 @@
-import json
 import logging
 import sys
 import queue
@@ -28,7 +27,6 @@ class SyncPage(QDialog, sync_page.Ui_sync_page):
     def __init__(self):
         super(SyncPage, self).__init__()
         self.setupUi(self)
-        self.progress_update_signal.connect()
         self.exec()
 
     def update_progress(self):
@@ -187,7 +185,7 @@ class Main(mainui.Ui_MainWidget):
             record = soup.find_all(name="a", class_="record-status--text pass")
 
             if record:
-                records.append(record[0])
+                records.append((record[0], i))
             else:
                 page = self.oiclass_session.get(url=f"http://oiclass.com/p/{i}").text
                 soup = BeautifulSoup(markup=page, features="lxml")
@@ -200,8 +198,14 @@ class Main(mainui.Ui_MainWidget):
         records = list(set(records))
 
         for i in records:
-            code = ""
-            ...
+            code = self.oiclass_session.get(f"{i[0]}?download=true").content
+            self.db["oiclass"]["problems"].append({"pname": i[1], "code": code})
+
+            with open("data.data", "wt") as f:
+                f.write(str(self.db))
+
+            self.load_data()
+            self.load_list()
 
     def load_list(self):
         self.problems.clear()
