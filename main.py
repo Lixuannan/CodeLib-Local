@@ -1,35 +1,26 @@
 import logging
-import sys
 import queue
+import sys
 import time
 from threading import Thread
 
 import requests
-from bs4 import BeautifulSoup
-from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QDialog, QApplication
+from bs4 import BeautifulSoup
 
 import ui
-
 
 data_stream = queue.Queue()
 progress = 0
 
 
-class Warming(QDialog, ui.Ui_warming_page):
-    def __init__(self, warming: str):
-        super(Warming, self).__init__()
+class Info(QDialog, ui.Ui_Info_Page):
+    def __init__(self, title: str, info: str):
+        super(Info, self).__init__()
         self.setupUi(self)
-        self.warming.setText(warming)
+        self.setWindowTitle(title)
+        self.textBrowser.setText(info)
         self.exec()
-
-
-class Error(QDialog, ui.Ui_error_page):
-    def __init__(self, error: str):
-        super(Error, self).__init__()
-        self.setupUi(self)
-        self.error_browser.setText(error)
-        sys.exit(self.exec())
 
 
 class GetInfo(QDialog, ui.Ui_Get_Info):
@@ -120,7 +111,7 @@ class Main(ui.Ui_MainWidget):
             error = soup.find_all(name="div", class_="error__text-container")
             if error:
                 error = error[0].text
-                Error(error)
+                Info(title="Error - 错误", info=error)
             else:
                 Error("Unknown Error")
 
@@ -181,6 +172,19 @@ class Main(ui.Ui_MainWidget):
 
         self.load_data()
         self.load_list()
+
+        info_thread = Thread(
+            target=lambda: Info(
+                title="Finish - 完成",
+                info=f"""Finish Sync of Oiclass
+            完成对 oiclass 的同步
+            Total Add {len(problems)} Problems
+            共新增 {len(problems)} 道题目
+            They are （他们是）：
+                {str(problems)}"""
+            ))
+
+        info_thread.start()
 
     def load_list(self):
         self.problems.clear()
