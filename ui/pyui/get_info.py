@@ -19,21 +19,21 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogBu
     QHBoxLayout, QLabel, QLineEdit, QSizePolicy,
     QVBoxLayout, QWidget)
 
-class Ui_window(object):
-    def setupUi(self, window):
-        if not window.objectName():
-            window.setObjectName(u"window")
-        window.resize(429, 127)
-        self.verticalLayout = QVBoxLayout(window)
+class Ui_Get_Info(object):
+    def setupUi(self, Get_Info):
+        if not Get_Info.objectName():
+            Get_Info.setObjectName(u"Get_Info")
+        Get_Info.resize(429, 127)
+        self.verticalLayout = QVBoxLayout(Get_Info)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.label = QLabel(window)
+        self.label = QLabel(Get_Info)
         self.label.setObjectName(u"label")
 
         self.horizontalLayout.addWidget(self.label)
 
-        self.info_line = QLineEdit(window)
+        self.info_line = QLineEdit(Get_Info)
         self.info_line.setObjectName(u"info_line")
 
         self.horizontalLayout.addWidget(self.info_line)
@@ -41,7 +41,7 @@ class Ui_window(object):
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.buttonBox = QDialogButtonBox(window)
+        self.buttonBox = QDialogButtonBox(Get_Info)
         self.buttonBox.setObjectName(u"buttonBox")
         self.buttonBox.setOrientation(Qt.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
@@ -49,13 +49,13 @@ class Ui_window(object):
         self.verticalLayout.addWidget(self.buttonBox)
 
 
-        self.retranslateUi(window)
+        self.retranslateUi(Get_Info)
 
-        QMetaObject.connectSlotsByName(window)
+        QMetaObject.connectSlotsByName(Get_Info)
     # setupUi
 
-    def retranslateUi(self, window):
-        window.setWindowTitle(QCoreApplication.translate("window", u"Lost Info - \u7f3a\u5c11\u4fe1\u606f", None))
-        self.label.setText(QCoreApplication.translate("window", u"Info", None))
+    def retranslateUi(self, Get_Info):
+        Get_Info.setWindowTitle(QCoreApplication.translate("Get_Info", u"Lost Info - \u7f3a\u5c11\u4fe1\u606f", None))
+        self.label.setText(QCoreApplication.translate("Get_Info", u"Info", None))
     # retranslateUi
 

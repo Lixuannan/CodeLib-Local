@@ -10,35 +10,14 @@ from bs4 import BeautifulSoup
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QDialog, QApplication
 
-import mainui
-import error_page
-import warming_page
-import get_info
-import sync_page
-import problem_view
+import ui
 
 
 data_stream = queue.Queue()
 progress = 0
 
 
-class SyncPage(QDialog, sync_page.Ui_sync_page):
-    progress_update_signal = Signal()
-
-    def __init__(self):
-        super(SyncPage, self).__init__()
-        self.setupUi(self)
-        self.exec()
-
-    def update_progress(self):
-        self.progressBar.setValue(progress)
-        if progress >= 100:
-            self.buttonBox.setUpdatesEnabled(True)
-
-        self.update()
-
-
-class Warming(QDialog, warming_page.Ui_warming_page):
+class Warming(QDialog, ui.Ui_warming_page):
     def __init__(self, warming: str):
         super(Warming, self).__init__()
         self.setupUi(self)
@@ -46,7 +25,7 @@ class Warming(QDialog, warming_page.Ui_warming_page):
         self.exec()
 
 
-class Error(QDialog, error_page.Ui_error_page):
+class Error(QDialog, ui.Ui_error_page):
     def __init__(self, error: str):
         super(Error, self).__init__()
         self.setupUi(self)
@@ -54,7 +33,7 @@ class Error(QDialog, error_page.Ui_error_page):
         sys.exit(self.exec())
 
 
-class GetInfo(QDialog, get_info.Ui_window):
+class GetInfo(QDialog, ui.Ui_Get_Info):
     def __init__(self, info_name: str):
         super(GetInfo, self).__init__()
         self.setupUi(self)
@@ -67,7 +46,7 @@ class GetInfo(QDialog, get_info.Ui_window):
         self.close()
 
 
-class ShowProblem(QDialog, problem_view.Ui_problem_view):
+class ShowProblem(QDialog, ui.Ui_problem_view):
     def __init__(self, site: str, problem: str, code: str):
         super(ShowProblem, self).__init__()
         self.setupAll(site, problem, code)
@@ -80,7 +59,7 @@ class ShowProblem(QDialog, problem_view.Ui_problem_view):
         self.code_browser.setText(code)
 
 
-class Main(mainui.Ui_MainWidget):
+class Main(ui.Ui_MainWidget):
     def __init__(self):
         self.db = {}
         self.log = logging.getLogger("CodeLib-Log")
