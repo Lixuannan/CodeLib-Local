@@ -11,4 +11,14 @@
 -   [ ] [Codeforces](https://codeforces.com/)
 -   [ ] ….
 
-You can add issue to let me support more and more OJs, Have a good time ~
+You can add issue to let me support more and more OJs, Have a good time ~~
+
+### Usage : 
+
+```shell
+git clone https://github.com/Lixuannan/CodeLib-Local.git # https://gitee.com/lixuannan/CodeLib-Local.git is also  able
+cd CodeLib-Local
+pip3 install -r requirements.txt
+python3 main.py
+```
+
