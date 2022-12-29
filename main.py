@@ -2,7 +2,6 @@ import logging
 import sys
 import queue
 import time
-import traceback
 from threading import Thread
 
 import requests
@@ -189,12 +188,8 @@ class Main(ui.Ui_MainWidget):
             self.problems.addItem(f"oiclass-{i['pname']}")
 
     def load_data(self):
-        try:
-            with open("data.data", "rt") as f:
-                self.db = eval(f.read())
-        except:
-            exception = traceback.format_exc()
-            self.log.error(exception)
+        with open("data.data", "rt") as f:
+            self.db = eval(f.read())
 
 
 if __name__ == '__main__':
