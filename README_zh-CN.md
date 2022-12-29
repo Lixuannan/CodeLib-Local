@@ -2,6 +2,8 @@
 
 #### 我自用的 OJ 题目代码仓库
 
+[English](./README.md) [简体中文](./README_zh-CN.md)
+
 ### 支持的 OJ :
 
 -   [x] [oiclass](http://www.oiclass.com)

@@ -2,6 +2,8 @@
 
 #### A Problem's Code Library for Myself
 
+[English](./README.md) [简体中文](./README_zh-CN.md)
+
 ### Support OJs :
 
 -   [x] [oiclass](http://www.oiclass.com)
