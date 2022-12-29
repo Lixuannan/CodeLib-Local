@@ -1,6 +1,7 @@
 import logging
 import sys
 import queue
+import time
 import traceback
 from threading import Thread
 
@@ -143,7 +144,7 @@ class Main(mainui.Ui_MainWidget):
                 error = error[0].text
                 Error(error)
             else:
-                Error("Unknow Error")
+                Error("Unknown Error")
 
         page = self.oiclass_session.get(f"http://oiclass.com/user/{self.db['oiclass']['info']['uid']}").text
         soup = BeautifulSoup(markup=page, features="lxml")
@@ -158,16 +159,12 @@ class Main(mainui.Ui_MainWidget):
         for i in self.db["oiclass"]["problems"]:
             ac_problems_local.add(i["pname"])
 
-        need_update_problems = ac_problems_server - ac_problems_local
+        need_update_problems = list(ac_problems_server - ac_problems_local)
 
-        SyncPage()
         sync_thread = Thread(target=lambda: self.sync_oiclass_problems(need_update_problems))
         sync_thread.start()
-        ###################
-        # NEED A NEW PAGE #
-        ###################
 
-    def sync_oiclass_problems(self, problems: set):
+    def sync_oiclass_problems(self, problems: list):
         records = []
         for i in problems:
             page = self.oiclass_session.get(url=f"http://oiclass.com/record?"
@@ -180,32 +177,32 @@ class Main(mainui.Ui_MainWidget):
                     error = error[0].text
                     Error(error)
                 else:
-                    Error("Unknow Error")
+                    Error("Unknown Error")
 
             record = soup.find_all(name="a", class_="record-status--text pass")
 
             if record:
-                records.append((record[0], i))
+                records.append((record[0]["href"], i))
             else:
                 page = self.oiclass_session.get(url=f"http://oiclass.com/p/{i}").text
                 soup = BeautifulSoup(markup=page, features="lxml")
                 record = soup.find_all(name="a", class_="record-status--text pass")
                 if record:
                     records.append(record[0])
-                else:
-                    Warming(f"No record found from problem: {i}\n在题目 {i} 中未找到记录")
-
-        records = list(set(records))
 
         for i in records:
-            code = self.oiclass_session.get(f"{i[0]}?download=true").content
+            code = str(self.oiclass_session.get(f"http://oiclass.com{i[0]}?download=true").content.decode())
+            if "<!DOCTYPE html>" in code:
+                time.sleep(5)
+                code = str(self.oiclass_session.get(f"http://oiclass.com{i[0]}?download=true").content.decode())
+
             self.db["oiclass"]["problems"].append({"pname": i[1], "code": code})
 
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
+        with open("data.data", "wt") as f:
+            f.write(str(self.db))
 
-            self.load_data()
-            self.load_list()
+        self.load_data()
+        self.load_list()
 
     def load_list(self):
         self.problems.clear()
