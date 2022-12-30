@@ -1,8 +1,11 @@
 beautifulsoup4==4.11.1
 certifi==2022.12.7
+chardet==5.1.0
 charset-normalizer==2.1.1
+cx-Freeze==6.13.1
 idna==3.4
 lxml==4.9.2
+packaging==22.0
 PySide6==6.4.1
 PySide6-Addons==6.4.1
 PySide6-Essentials==6.4.1
