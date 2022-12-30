@@ -76,6 +76,7 @@ class Main(ui.Ui_MainWidget, QObject):
     def sync_func(self):
         # Sync oiclass.com 同步 oiclass 的数据
         self.oiclass_session = requests.Session()
+        self.luogu_session = requests.Session()
 
         # Check if info is completed 检查信息完整性
         if not self.db["oiclass"]["info"]["username"]:
@@ -99,6 +100,33 @@ class Main(ui.Ui_MainWidget, QObject):
         if not self.db["oiclass"]["info"]["uid"]:
             GetInfo("oiclass: UID :")
             self.db["oiclass"]["info"]["uid"] = data_stream.get()
+            with open("data.data", "wt") as f:
+                f.write(str(self.db))
+
+            self.load_data()
+            self.load_list()
+
+        if not self.db["luogu"]["info"]["username"]:
+            GetInfo("luogu: Username 用户名: ")
+            self.db["luogu"]["info"]["username"] = data_stream.get()
+            with open("data.data", "wt") as f:
+                f.write(str(self.db))
+
+            self.load_data()
+            self.load_list()
+
+        if not self.db["luogu"]["info"]["password"]:
+            GetInfo("luogu: Password 密码: ")
+            self.db["luogu"]["info"]["password"] = data_stream.get()
+            with open("data.data", "wt") as f:
+                f.write(str(self.db))
+
+            self.load_data()
+            self.load_list()
+
+        if not self.db["luogu"]["info"]["uid"]:
+            GetInfo("luogu: UID :")
+            self.db["luogu"]["info"]["uid"] = data_stream.get()
             with open("data.data", "wt") as f:
                 f.write(str(self.db))
 
@@ -137,6 +165,8 @@ class Main(ui.Ui_MainWidget, QObject):
 
         sync_thread = Thread(target=lambda: self.sync_oiclass_problems(need_update_problems))
         sync_thread.start()
+
+
 
     def sync_oiclass_problems(self, problems: list):
         records = []
