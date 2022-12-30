@@ -6,6 +6,7 @@ from threading import Thread
 
 import requests
 from PySide6.QtWidgets import QWidget, QDialog, QApplication
+from PySide6.QtCore import Signal, QObject
 from bs4 import BeautifulSoup
 
 import ui
@@ -49,8 +50,11 @@ class ShowProblem(QDialog, ui.Ui_problem_view):
         self.code_browser.setText(code)
 
 
-class Main(ui.Ui_MainWidget):
+class Main(ui.Ui_MainWidget, QObject):
+    ShowInfoSignal = Signal()
+
     def __init__(self):
+        super().__init__()
         self.db = {}
         self.log = logging.getLogger("CodeLib-Log")
         self.load_data()
@@ -59,6 +63,7 @@ class Main(ui.Ui_MainWidget):
         self.setupUi(mainWindow)
         self.sync.clicked.connect(self.sync_func)
         self.load_list()
+        self.ShowInfoSignal.connect(lambda: Info(title=data_stream.get(), info=data_stream.get()))
         self.problems.itemDoubleClicked.connect(lambda: self.show_problems(self.problems.selectedItems()[0]))
 
     def show_problems(self, problem):
@@ -173,18 +178,17 @@ class Main(ui.Ui_MainWidget):
         self.load_data()
         self.load_list()
 
-        info_thread = Thread(
-            target=lambda: Info(
-                title="Finish - 完成",
-                info=f"""Finish Sync of Oiclass
+        data_stream.put("Finish - 完成")
+        data_stream.put(
+            f"""Finish Sync of Oiclass
             完成对 oiclass 的同步
             Total Add {len(problems)} Problems
             共新增 {len(problems)} 道题目
             They are （他们是）：
                 {str(problems)}"""
-            ))
+        )
 
-        info_thread.start()
+        self.ShowInfoSignal.emit()
 
     def load_list(self):
         self.problems.clear()
