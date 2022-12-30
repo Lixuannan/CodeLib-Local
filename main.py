@@ -5,8 +5,8 @@ import time
 from threading import Thread
 
 import requests
-from PySide6.QtWidgets import QWidget, QDialog, QApplication
 from PySide6.QtCore import Signal, QObject
+from PySide6.QtWidgets import QWidget, QDialog, QApplication
 from bs4 import BeautifulSoup
 
 import ui
