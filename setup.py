@@ -1,7 +1,7 @@
 from cx_Freeze import setup, Executable
 
 build_exe_options = {
-    'packages': ["requests", "PySide6", "bs4", ],
+    'packages': ["requests", "PySide6", "bs4"],
     'excludes': []
 }
 
