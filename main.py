@@ -2,7 +2,7 @@ import logging
 import queue
 import sys
 import time
-from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
 
 import requests
 from PySide6.QtCore import Signal, QObject
@@ -77,6 +77,7 @@ class Main(ui.Ui_MainWidget, QObject):
         # Sync oiclass.com 同步 oiclass 的数据
         self.oiclass_session = requests.Session()
         self.luogu_session = requests.Session()
+        self.pool = ThreadPoolExecutor(1)
 
         # Check if info is completed 检查信息完整性
         if not self.db["oiclass"]["info"]["username"]:
@@ -163,10 +164,7 @@ class Main(ui.Ui_MainWidget, QObject):
 
         need_update_problems = list(ac_problems_server - ac_problems_local)
 
-        sync_thread = Thread(target=lambda: self.sync_oiclass_problems(need_update_problems))
-        sync_thread.start()
-
-
+        self.pool.submit(lambda: self.sync_oiclass_problems(need_update_problems))
 
     def sync_oiclass_problems(self, problems: list):
         records = []
