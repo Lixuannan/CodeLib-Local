@@ -84,56 +84,31 @@ class Main(ui.Ui_MainWidget, QObject):
         if not self.db["oiclass"]["info"]["username"]:
             GetInfo("oiclass: Username 用户名: ")
             self.db["oiclass"]["info"]["username"] = data_stream.get()
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
-
-            self.load_data()
-            self.load_list()
 
         if not self.db["oiclass"]["info"]["password"]:
             GetInfo("oiclass: Password 密码: ")
             self.db["oiclass"]["info"]["password"] = data_stream.get()
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
-
-            self.load_data()
-            self.load_list()
 
         if not self.db["oiclass"]["info"]["uid"]:
             GetInfo("oiclass: UID :")
             self.db["oiclass"]["info"]["uid"] = data_stream.get()
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
 
-            self.load_data()
-            self.load_list()
+        if not self.db["hydro"]["info"]["username"]:
+            GetInfo("hydro: Username 用户名: ")
+            self.db["hydro"]["info"]["username"] = data_stream.get()
 
-        if not self.db["luogu"]["info"]["username"]:
-            GetInfo("luogu: Username 用户名: ")
-            self.db["luogu"]["info"]["username"] = data_stream.get()
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
+        if not self.db["hydro"]["info"]["password"]:
+            GetInfo("hydro: Password 密码: ")
+            self.db["hydro"]["info"]["password"] = data_stream.get()
 
-            self.load_data()
-            self.load_list()
+        if not self.db["hydro"]["info"]["uid"]:
+            GetInfo("hydro: UID :")
+            self.db["hydro"]["info"]["uid"] = data_stream.get()
 
-        if not self.db["luogu"]["info"]["password"]:
-            GetInfo("luogu: Password 密码: ")
-            self.db["luogu"]["info"]["password"] = data_stream.get()
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
-
-            self.load_data()
-            self.load_list()
-
-        if not self.db["luogu"]["info"]["uid"]:
-            GetInfo("luogu: UID :")
-            self.db["luogu"]["info"]["uid"] = data_stream.get()
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
-
-            self.load_data()
-            self.load_list()
+        with open("data.data", "wt") as f:
+            f.write(str(self.db))
+        self.load_data()
+        self.load_list()
 
         # login oiclass 登录 oiclass
         page = self.oiclass_session.post(url="http://oiclass.com/login/", data={
