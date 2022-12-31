@@ -7,7 +7,7 @@
 ### 支持的 OJ：
 
 -   [x] [oiclass](http://www.oiclass.com)
--   [ ] [洛谷 Luogu](https://luogu.com.cn)
+-   [ ] [Hydro](https://hydro.ac)
 -   [ ] [CodeForces](https://codeforces.com/)
 -   [ ] ….
 

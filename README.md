@@ -7,7 +7,7 @@
 ### Support OJs :
 
 -   [x] [oiclass](http://www.oiclass.com)
--   [ ] [luogu 洛谷](luogu.com.cn)
+-   [ ] [Hydro](https://hydro.ac)
 -   [ ] [Codeforces](https://codeforces.com/)
 -   [ ] ….
 
