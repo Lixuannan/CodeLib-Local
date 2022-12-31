@@ -76,7 +76,8 @@ class Main(ui.Ui_MainWidget, QObject):
     def sync_func(self):
         # Sync oiclass.com 同步 oiclass 的数据
         self.oiclass_session = requests.Session()
-        self.luogu_session = requests.Session()
+        self.hydro_session = requests.Session()
+
         self.pool = ThreadPoolExecutor(1)
 
         # Check if info is completed 检查信息完整性
