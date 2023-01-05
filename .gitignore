@@ -4,3 +4,4 @@ data.data
 dist
 build
 venv
+._*
