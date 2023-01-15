@@ -5,6 +5,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 import requests
+import pyperclip
 from PySide6.QtCore import Signal, QObject
 from PySide6.QtWidgets import QWidget, QDialog, QApplication
 from bs4 import BeautifulSoup
@@ -45,9 +46,14 @@ class ShowProblem(QDialog, ui.Ui_problem_view):
 
     def setupAll(self, site: str, problem: str, code: str):
         self.setupUi(self)
+        self.code = code
         self.site.setText(site)
         self.problem.setText(problem)
         self.code_browser.setText(code)
+        self.pushButton.clicked.connect(self.copy_code)
+
+    def copy_code(self):
+        pyperclip.copy(self.code)
 
 
 class Main(ui.Ui_MainWidget, QObject):
@@ -304,3 +310,4 @@ if __name__ == '__main__':
     main.setupAll(main_widget)
     main_widget.show()
     sys.exit(app.exec())
+
