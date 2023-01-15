@@ -4,8 +4,8 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-import requests
 import pyperclip
+import requests
 from PySide6.QtCore import Signal, QObject
 from PySide6.QtWidgets import QWidget, QDialog, QApplication
 from bs4 import BeautifulSoup
@@ -310,4 +310,3 @@ if __name__ == '__main__':
     main.setupAll(main_widget)
     main_widget.show()
     sys.exit(app.exec())
-
