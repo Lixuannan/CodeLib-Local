@@ -105,17 +105,17 @@ class Main(ui.Ui_MainWidget, QObject):
             self.load_data()
             self.load_list()
 
-        # if not self.db["hydro"]["info"]["username"]:
-        #     GetInfo("hydro: Username 用户名: ")
-        #     self.db["hydro"]["info"]["username"] = data_stream.get()
-        #
-        # if not self.db["hydro"]["info"]["password"]:
-        #     GetInfo("hydro: Password 密码: ")
-        #     self.db["hydro"]["info"]["password"] = data_stream.get()
-        #
-        # if not self.db["hydro"]["info"]["uid"]:
-        #     GetInfo("hydro: UID :")
-        #     self.db["hydro"]["info"]["uid"] = data_stream.get()
+        if not self.db["hydro"]["info"]["username"]:
+            GetInfo("hydro: Username 用户名: ")
+            self.db["hydro"]["info"]["username"] = data_stream.get()
+
+        if not self.db["hydro"]["info"]["password"]:
+            GetInfo("hydro: Password 密码: ")
+            self.db["hydro"]["info"]["password"] = data_stream.get()
+
+        if not self.db["hydro"]["info"]["uid"]:
+            GetInfo("hydro: UID :")
+            self.db["hydro"]["info"]["uid"] = data_stream.get()
 
         # login oiclass 登录 oiclass
         page = self.oiclass_session.post(url="http://oiclass.com/login/", data={
