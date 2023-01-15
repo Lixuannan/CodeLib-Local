@@ -16,8 +16,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
-    QFrame, QHBoxLayout, QLabel, QSizePolicy,
-    QTextBrowser, QVBoxLayout, QWidget)
+    QFrame, QHBoxLayout, QLabel, QPushButton,
+    QSizePolicy, QTextBrowser, QVBoxLayout, QWidget)
 
 class Ui_problem_view(object):
     def setupUi(self, problem_view):
@@ -75,13 +75,6 @@ class Ui_problem_view(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.label_5 = QLabel(problem_view)
-        self.label_5.setObjectName(u"label_5")
-        self.label_5.setFont(font)
-        self.label_5.setAlignment(Qt.AlignCenter)
-
-        self.horizontalLayout_3.addWidget(self.label_5)
-
         self.line = QFrame(problem_view)
         self.line.setObjectName(u"line")
         sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
@@ -94,8 +87,39 @@ class Ui_problem_view(object):
 
         self.horizontalLayout_3.addWidget(self.line)
 
+        self.verticalLayout_2 = QVBoxLayout()
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.label = QLabel(problem_view)
+        self.label.setObjectName(u"label")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy2)
+        self.label.setFont(font)
+
+        self.verticalLayout_2.addWidget(self.label)
+
+        self.pushButton = QPushButton(problem_view)
+        self.pushButton.setObjectName(u"pushButton")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.pushButton.sizePolicy().hasHeightForWidth())
+        self.pushButton.setSizePolicy(sizePolicy3)
+
+        self.verticalLayout_2.addWidget(self.pushButton)
+
+
+        self.horizontalLayout_3.addLayout(self.verticalLayout_2)
+
         self.code_browser = QTextBrowser(problem_view)
         self.code_browser.setObjectName(u"code_browser")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.code_browser.sizePolicy().hasHeightForWidth())
+        self.code_browser.setSizePolicy(sizePolicy4)
         font1 = QFont()
         font1.setPointSize(15)
         self.code_browser.setFont(font1)
@@ -125,7 +149,8 @@ class Ui_problem_view(object):
         self.site.setText(QCoreApplication.translate("problem_view", u"None", None))
         self.label_4.setText(QCoreApplication.translate("problem_view", u"\u9898\u76ee  ", None))
         self.problem.setText(QCoreApplication.translate("problem_view", u"None", None))
-        self.label_5.setText(QCoreApplication.translate("problem_view", u"\u4ee3 \u7801", None))
+        self.label.setText(QCoreApplication.translate("problem_view", u"\u4ee3\u7801", None))
+        self.pushButton.setText(QCoreApplication.translate("problem_view", u"Copy", None))
         self.code_browser.setHtml(QCoreApplication.translate("problem_view", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
