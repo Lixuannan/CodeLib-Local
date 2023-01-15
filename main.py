@@ -149,6 +149,89 @@ class Main(ui.Ui_MainWidget, QObject):
 
         self.pool.submit(lambda: self.sync_oiclass_problems(need_update_problems))
 
+        page = self.hydro_session.post(url="https://hydro.ac/login", data={
+            "uname": self.db["hydro"]["info"]["username"],
+            "password": self.db["hydro"]["info"]["password"],
+        }).text
+
+        if "Oops!" in page:
+            soup = BeautifulSoup(markup=page, features="lxml")
+            error = soup.find_all(name="div", class_="error__text-container")
+            if error:
+                error = error[0].text
+                Info(title="Error - 错误", info=error)
+            else:
+                Error("Unknown Error")
+
+        ac_problems_server = set()
+        ac_problems_local = set()
+
+        for i in self.db["hydro"]["problems"]:
+            ac_problems_local.add(i["pname"])
+
+        page = self.hydro_session.get(url=f"https://hydro.ac/user/{self.db['hydro']['info']['uid']}").text
+        soup = BeautifulSoup(markup=page, features="lxml")
+
+        for i in soup.find_all(name="a"):
+            if "p/" in i["href"]:
+                ac_problems_server.add(i.text)
+
+        need_update_problems = list(ac_problems_server - ac_problems_local)
+
+        self.pool.submit(lambda: self.sync_hydro_problems(need_update_problems))
+
+    def sync_hydro_problems(self, problems: list):
+        records = []
+        for i in problems:
+            page = self.hydro_session.get(
+                url=f"https://hydro.ac/record?uidOrName=10952&pid=H1000&tid=&lang=&status=1").text
+            soup = BeautifulSoup(markup=page, features="lxml")
+
+            if "Oops!" in page:
+                error = soup.find_all(name="div", class_="error__text-container")
+                if error:
+                    error = error[0].text
+                    Error(error)
+                else:
+                    Error("Unknown Error")
+
+            record = soup.find_all(name="a", class_="record-status--text pass")
+
+            if record:
+                records.append((record[0]["href"], i))
+            else:
+                page = self.hydro_session.get(url=f"https://hydro.ac/p/{i}").text
+                soup = BeautifulSoup(markup=page, features="lxml")
+                record = soup.find_all(name="a", class_="record-status--text pass")
+                if record:
+                    records.append(record[0])
+
+        for i in records:
+            code = str(self.hydro_session.get(f"https://hydro.ac{i[0]}?download=true").content.decode())
+            if "<!DOCTYPE html>" in code:
+                time.sleep(5)
+                code = str(self.hydro_session.get(f"https://hydro.ac{i[0]}?download=true").content.decode())
+
+            self.db["hydro"]["problems"].append({"pname": i[1], "code": code})
+
+        with open("data.data", "wt") as f:
+            f.write(str(self.db))
+
+        self.load_data()
+        self.load_list()
+
+        data_stream.put("Finish - 完成")
+        data_stream.put(
+            f"""Finish Sync of Hydro
+            完成对 hydro 的同步
+            Total Add {len(problems)} Problems
+            共新增 {len(problems)} 道题目
+            They are （他们是）：
+                {str(problems)}"""
+        )
+
+        self.ShowInfoSignal.emit()
+
     def sync_oiclass_problems(self, problems: list):
         records = []
         for i in problems:
@@ -205,6 +288,9 @@ class Main(ui.Ui_MainWidget, QObject):
         self.problems.clear()
         for i in self.db["oiclass"]["problems"]:
             self.problems.addItem(f"oiclass-{i['pname']}")
+
+        for i in self.db["hydro"]["problems"]:
+            self.problems.addItem(f"hydro-{i['pname']}")
 
     def load_data(self):
         with open("data.data", "rt") as f:
