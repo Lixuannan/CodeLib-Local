@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import pyperclip
 import requests
-from PySide6.QtCore import Signal, QObject
+from PySide6.QtCore import Signal, QObject, Qt
 from PySide6.QtWidgets import QWidget, QDialog, QApplication
 from bs4 import BeautifulSoup
 
@@ -43,6 +43,7 @@ class ShowProblem(QDialog, ui.Ui_problem_view):
         super(ShowProblem, self).__init__()
         self.setupAll(site, problem, code)
         self.exec()
+        self.code = ""
 
     def setupAll(self, site: str, problem: str, code: str):
         self.setupUi(self)
@@ -56,11 +57,34 @@ class ShowProblem(QDialog, ui.Ui_problem_view):
         pyperclip.copy(self.code)
 
 
+class ChooseOJ(QDialog, ui.Ui_Dialog):
+    def __init__(self):
+        self.data = []
+        super(ChooseOJ, self).__init__()
+        self.setupAll()
+        self.exec()
+
+    def setupAll(self):
+        self.setupUi(self)
+        self.accepted.connect(self.send_data)
+
+    def send_data(self):
+        if self.checkBox_0.checkState() == Qt.CheckState.Checked:
+            self.data.append("oiclass")
+        if self.checkBox_1.checkState() == Qt.CheckState.Checked:
+            self.data.append("hydro")
+
+        data_stream.put(self.data)
+
+
 class Main(ui.Ui_MainWidget, QObject):
     ShowInfoSignal = Signal()
 
     def __init__(self):
         super().__init__()
+        self.hydro_session = requests.Session()
+        self.pool = ThreadPoolExecutor(1)
+        self.oiclass_session = requests.Session()
         self.db = {}
         self.log = logging.getLogger("CodeLib-Log")
         self.load_data()
@@ -80,80 +104,31 @@ class Main(ui.Ui_MainWidget, QObject):
                 ShowProblem(site=info[0], problem=info[1], code=i["code"])
 
     def sync_func(self):
-        # Sync oiclass.com 同步 oiclass 的数据
-        self.oiclass_session = requests.Session()
-        self.hydro_session = requests.Session()
+        ChooseOJ()
+        sync_list = data_stream.get()
+        print(sync_list)
+        for i in sync_list:
+            eval(f"self.pool.submit(self.sync_{i}_problems)")
 
-        self.pool = ThreadPoolExecutor(1)
-
-        # Check if info is completed 检查信息完整性
-        if not self.db["oiclass"]["info"]["username"]:
-            GetInfo("oiclass: Username 用户名: ")
-            self.db["oiclass"]["info"]["username"] = data_stream.get()
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
-            self.load_data()
-            self.load_list()
-
-        if not self.db["oiclass"]["info"]["password"]:
-            GetInfo("oiclass: Password 密码: ")
-            self.db["oiclass"]["info"]["password"] = data_stream.get()
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
-            self.load_data()
-            self.load_list()
-
-        if not self.db["oiclass"]["info"]["uid"]:
-            GetInfo("oiclass: UID :")
-            self.db["oiclass"]["info"]["uid"] = data_stream.get()
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
-            self.load_data()
-            self.load_list()
-
+    def sync_hydro_problems(self):
+        print("hydro")
         if not self.db["hydro"]["info"]["username"]:
             GetInfo("hydro: Username 用户名: ")
             self.db["hydro"]["info"]["username"] = data_stream.get()
+            self.load_data()
+            self.load_list()
 
         if not self.db["hydro"]["info"]["password"]:
             GetInfo("hydro: Password 密码: ")
             self.db["hydro"]["info"]["password"] = data_stream.get()
+            self.load_data()
+            self.load_list()
 
         if not self.db["hydro"]["info"]["uid"]:
             GetInfo("hydro: UID :")
             self.db["hydro"]["info"]["uid"] = data_stream.get()
-
-        # login oiclass 登录 oiclass
-        page = self.oiclass_session.post(url="http://oiclass.com/login/", data={
-            "uname": self.db["oiclass"]["info"]["username"],
-            "password": self.db["oiclass"]["info"]["password"]
-        }).text
-
-        if "Oops!" in page:
-            soup = BeautifulSoup(markup=page, features="lxml")
-            error = soup.find_all(name="div", class_="error__text-container")
-            if error:
-                error = error[0].text
-                Info(title="Error - 错误", info=error)
-            else:
-                Error("Unknown Error")
-
-        page = self.oiclass_session.get(f"http://oiclass.com/user/{self.db['oiclass']['info']['uid']}").text
-        soup = BeautifulSoup(markup=page, features="lxml")
-        problems = soup.find_all(name="a")
-        ac_problems_server = set()
-        ac_problems_local = set()
-
-        for i in problems:
-            if "/p/" in i["href"]:
-                ac_problems_server.add(i.text)
-
-        for i in self.db["oiclass"]["problems"]:
-            ac_problems_local.add(i["pname"])
-
-        need_update_problems = list(ac_problems_server - ac_problems_local)
-
-        self.pool.submit(lambda: self.sync_oiclass_problems(need_update_problems))
+            self.load_data()
+            self.load_list()
 
         page = self.hydro_session.post(url="https://hydro.ac/login", data={
             "uname": self.db["hydro"]["info"]["username"],
@@ -182,11 +157,8 @@ class Main(ui.Ui_MainWidget, QObject):
             if "p/" in i["href"]:
                 ac_problems_server.add(i.text)
 
-        need_update_problems = list(ac_problems_server - ac_problems_local)
+        problems = list(ac_problems_server - ac_problems_local)
 
-        self.pool.submit(lambda: self.sync_hydro_problems(need_update_problems))
-
-    def sync_hydro_problems(self, problems: list):
         records = []
         for i in problems:
             page = self.hydro_session.get(
@@ -238,7 +210,61 @@ class Main(ui.Ui_MainWidget, QObject):
 
         self.ShowInfoSignal.emit()
 
-    def sync_oiclass_problems(self, problems: list):
+    def sync_oiclass_problems(self):
+        print("oiclass")
+        if not self.db["oiclass"]["info"]["username"]:
+            GetInfo("oiclass: Username 用户名: ")
+            self.db["oiclass"]["info"]["username"] = data_stream.get()
+            with open("data.data", "wt") as f:
+                f.write(str(self.db))
+            self.load_data()
+            self.load_list()
+
+        if not self.db["oiclass"]["info"]["password"]:
+            GetInfo("oiclass: Password 密码: ")
+            self.db["oiclass"]["info"]["password"] = data_stream.get()
+            with open("data.data", "wt") as f:
+                f.write(str(self.db))
+            self.load_data()
+            self.load_list()
+
+        if not self.db["oiclass"]["info"]["uid"]:
+            GetInfo("oiclass: UID :")
+            self.db["oiclass"]["info"]["uid"] = data_stream.get()
+            with open("data.data", "wt") as f:
+                f.write(str(self.db))
+            self.load_data()
+            self.load_list()
+
+        page = self.oiclass_session.post(url="http://oiclass.com/login/", data={
+            "uname": self.db["oiclass"]["info"]["username"],
+            "password": self.db["oiclass"]["info"]["password"]
+        }).text
+
+        if "Oops!" in page:
+            soup = BeautifulSoup(markup=page, features="lxml")
+            error = soup.find_all(name="div", class_="error__text-container")
+            if error:
+                error = error[0].text
+                Info(title="Error - 错误", info=error)
+            else:
+                Error("Unknown Error")
+
+        page = self.oiclass_session.get(f"http://oiclass.com/user/{self.db['oiclass']['info']['uid']}").text
+        soup = BeautifulSoup(markup=page, features="lxml")
+        problems = soup.find_all(name="a")
+        ac_problems_server = set()
+        ac_problems_local = set()
+
+        for i in problems:
+            if "/p/" in i["href"]:
+                ac_problems_server.add(i.text)
+
+        for i in self.db["oiclass"]["problems"]:
+            ac_problems_local.add(i["pname"])
+
+        problems = list(ac_problems_server - ac_problems_local)
+
         records = []
         for i in problems:
             page = self.oiclass_session.get(url=f"http://oiclass.com/record?"
