@@ -106,12 +106,10 @@ class Main(ui.Ui_MainWidget, QObject):
     def sync_func(self):
         ChooseOJ()
         sync_list = data_stream.get()
-        print(sync_list)
         for i in sync_list:
             eval(f"self.pool.submit(self.sync_{i}_problems)")
 
     def sync_hydro_problems(self):
-        print("hydro")
         if not self.db["hydro"]["info"]["username"]:
             GetInfo("hydro: Username 用户名: ")
             self.db["hydro"]["info"]["username"] = data_stream.get()
@@ -211,7 +209,6 @@ class Main(ui.Ui_MainWidget, QObject):
         self.ShowInfoSignal.emit()
 
     def sync_oiclass_problems(self):
-        print("oiclass")
         if not self.db["oiclass"]["info"]["username"]:
             GetInfo("oiclass: Username 用户名: ")
             self.db["oiclass"]["info"]["username"] = data_stream.get()
