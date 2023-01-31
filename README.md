@@ -7,7 +7,7 @@
 ### Support OJs :
 
 -   [x] [oiclass](http://www.oiclass.com)
--   [x] [Hydro](https://hydro.ac)
+-   [x] [HydroOJ](https://hydro.ac)
 -   [ ] [Codeforces](https://codeforces.com/)
 -   [ ] ….
 
