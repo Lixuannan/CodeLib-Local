@@ -95,6 +95,22 @@ class Main(ui.Ui_MainWidget, QObject):
         self.load_list()
         self.ShowInfoSignal.connect(lambda: Info(title=data_stream.get(), info=data_stream.get()))
         self.problems.itemDoubleClicked.connect(lambda: self.show_problems(self.problems.selectedItems()[0]))
+        self.keyword.textChanged.connect(self.search_func)
+
+    def search_func(self):
+        keyword = self.keyword.text()
+        if keyword == "":
+            self.load_list()
+            return 0
+
+        self.problems.clear()
+        for i in self.db["oiclass"]["problems"]:
+            if keyword in f"oiclass-{i['pname']}":
+                self.problems.addItem(f"oiclass-{i['pname']}")
+
+        for i in self.db["hydro"]["problems"]:
+            if keyword in f"hydro-{i['pname']}":
+                self.problems.addItem(f"hydro-{i['pname']}")
 
     def show_problems(self, problem):
         text = problem.text()
