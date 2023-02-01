@@ -16,6 +16,8 @@ data_stream = queue.Queue()
 progress = 0
 
 
+# show info
+# 显示信息
 class Info(QDialog, ui.Ui_Info_Page):
     def __init__(self, title: str, info: str):
         super(Info, self).__init__()
@@ -25,6 +27,8 @@ class Info(QDialog, ui.Ui_Info_Page):
         self.exec()
 
 
+# get some info
+# 获取必须的信息
 class GetInfo(QDialog, ui.Ui_Get_Info):
     def __init__(self, info_name: str):
         super(GetInfo, self).__init__()
@@ -33,11 +37,15 @@ class GetInfo(QDialog, ui.Ui_Get_Info):
         self.buttonBox.clicked.connect(self.get_value)
         self.exec()
 
+    # get value of the info which you want to know, then send it to "data_stream"
+    # 获得信息的值，并发送到全局变量 "data_stream" 中
     def get_value(self):
         data_stream.put(self.info_line.text())
         self.close()
 
 
+# show a problem
+# 显示题目
 class ShowProblem(QDialog, ui.Ui_problem_view):
     def __init__(self, site: str, problem: str, code: str):
         super(ShowProblem, self).__init__()
@@ -45,6 +53,8 @@ class ShowProblem(QDialog, ui.Ui_problem_view):
         self.exec()
         self.code = ""
 
+    # setup everything in this class
+    # 设置类中的所有乱七八糟的东西
     def setupAll(self, site: str, problem: str, code: str):
         self.setupUi(self)
         self.code = code
@@ -53,10 +63,14 @@ class ShowProblem(QDialog, ui.Ui_problem_view):
         self.code_browser.setText(code)
         self.pushButton.clicked.connect(self.copy_code)
 
+    # copy all code of this problem
+    # 复制题目的代码
     def copy_code(self):
         pyperclip.copy(self.code)
 
 
+# let user choose what OJ they want to sync
+# 让用户选择需要更新的 OJ
 class ChooseOJ(QDialog, ui.Ui_Dialog):
     def __init__(self):
         self.data = []
@@ -64,10 +78,14 @@ class ChooseOJ(QDialog, ui.Ui_Dialog):
         self.setupAll()
         self.exec()
 
+    # setup everything in this class
+    # 设置类中的所有乱七八糟的东西
     def setupAll(self):
         self.setupUi(self)
         self.accepted.connect(self.send_data)
 
+    # send data to the "data_stream"
+    # 将数据发送到全局变量 "data_stream"
     def send_data(self):
         if self.checkBox_0.checkState() == Qt.CheckState.Checked:
             self.data.append("oiclass")
@@ -77,6 +95,8 @@ class ChooseOJ(QDialog, ui.Ui_Dialog):
         data_stream.put(self.data)
 
 
+# main program
+# 主程序
 class Main(ui.Ui_MainWidget, QObject):
     ShowInfoSignal = Signal()
 
@@ -89,6 +109,8 @@ class Main(ui.Ui_MainWidget, QObject):
         self.log = logging.getLogger("CodeLib-Log")
         self.load_data()
 
+    # setup everything in this class
+    # 设置类中的所有乱七八糟的东西
     def setupAll(self, mainWindow):
         self.setupUi(mainWindow)
         self.sync.clicked.connect(self.sync_func)
@@ -97,6 +119,8 @@ class Main(ui.Ui_MainWidget, QObject):
         self.problems.itemDoubleClicked.connect(lambda: self.show_problems(self.problems.selectedItems()[0]))
         self.keyword.textChanged.connect(self.search_func)
 
+    # search problems
+    # 搜索题目
     def search_func(self):
         keyword = self.keyword.text()
         if keyword == "":
@@ -112,6 +136,8 @@ class Main(ui.Ui_MainWidget, QObject):
             if keyword in f"hydro-{i['pname']}":
                 self.problems.addItem(f"hydro-{i['pname']}")
 
+    # Show problems in a problem view
+    # 将题目详情展示出来
     def show_problems(self, problem):
         text = problem.text()
         info = text.split("-")
@@ -119,12 +145,16 @@ class Main(ui.Ui_MainWidget, QObject):
             if i["pname"] == info[1]:
                 ShowProblem(site=info[0], problem=info[1], code=i["code"])
 
+    # Call all sync function
+    # 调用所有同于同步的函数
     def sync_func(self):
         ChooseOJ()
         sync_list = data_stream.get()
         for i in sync_list:
             eval(f"self.pool.submit(self.sync_{i}_problems)")
 
+    # sync problems from hydro.ac
+    # 同步来自 hydro.ac 的题目
     def sync_hydro_problems(self):
         if not self.db["hydro"]["info"]["username"]:
             GetInfo("hydro: Username 用户名: ")
@@ -224,6 +254,8 @@ class Main(ui.Ui_MainWidget, QObject):
 
         self.ShowInfoSignal.emit()
 
+    # Sync problems from oiclass.com
+    # 同步来自 oiclass.com 的题目
     def sync_oiclass_problems(self):
         if not self.db["oiclass"]["info"]["username"]:
             GetInfo("oiclass: Username 用户名: ")
@@ -329,6 +361,8 @@ class Main(ui.Ui_MainWidget, QObject):
 
         self.ShowInfoSignal.emit()
 
+    # load problems from "self.db" to the GUI
+    # 将 "self.db" 中的题目信息加载到页面中
     def load_list(self):
         self.problems.clear()
         for i in self.db["oiclass"]["problems"]:
@@ -337,6 +371,8 @@ class Main(ui.Ui_MainWidget, QObject):
         for i in self.db["hydro"]["problems"]:
             self.problems.addItem(f"hydro-{i['pname']}")
 
+    # load data from "data.data" to "self.db"
+    # 将 "data.data" 之中的数据读取到变量 "self.db" 中
     def load_data(self):
         with open("data.data", "rt") as f:
             self.db = eval(f.read())
