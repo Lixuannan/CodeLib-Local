@@ -5,3 +5,4 @@ dist
 build
 venv
 ._*
+CodeLib-Local.spec

@@ -1,0 +1,1 @@
+iconutil -c icns icon.iconset -o icon.icns
