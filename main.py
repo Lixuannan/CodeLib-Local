@@ -1,4 +1,5 @@
 import logging
+import os.path
 import queue
 import sys
 import time
@@ -13,7 +14,9 @@ from bs4 import BeautifulSoup
 import ui
 
 data_stream = queue.Queue()
-progress = 0
+
+DATA_TEMPLATE = r"{'oiclass': {'info': {'username': '', 'password': '', 'uid': ''}, 'problems': []}, 'hydro':{'info': "\
+                r"{'username': '', 'password': '', 'uid': ''}, 'problems': []}}"
 
 
 # show info
@@ -87,9 +90,9 @@ class ChooseOJ(QDialog, ui.Ui_Dialog):
     # send data to the "data_stream"
     # 将数据发送到全局变量 "data_stream"
     def send_data(self):
-        if self.checkBox_0.checkState() == Qt.CheckState.Checked:
-            self.data.append("oiclass")
         if self.checkBox_1.checkState() == Qt.CheckState.Checked:
+            self.data.append("oiclass")
+        if self.checkBox_0.checkState() == Qt.CheckState.Checked:
             self.data.append("hydro")
 
         data_stream.put(self.data)
@@ -379,6 +382,9 @@ class Main(ui.Ui_MainWidget, QObject):
 
 
 if __name__ == '__main__':
+    if not os.path.isfile("data.data"):
+        with open("data.data", "wt") as file:
+            file.write(DATA_TEMPLATE)
     main = Main()
     app = QApplication()
     main_widget = QWidget()

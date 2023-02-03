@@ -19,7 +19,6 @@
 git clone https://github.com/Lixuannan/CodeLib-Local.git # 也可以是 https://gitee.com/lixuannan/CodeLib-Local.git
 cd CodeLib-Local
 pip3 install -r requirements.txt
-mv data.data.template data.data
 python3 main.py
 ```
 
