@@ -15,7 +15,7 @@ import ui
 
 data_stream = queue.Queue()
 
-DATA_TEMPLATE = r"{'oiclass': {'info': {'username': '', 'password': '', 'uid': ''}, 'problems': []}, 'hydro':{'info': "\
+DATA_TEMPLATE = r"{'oiclass': {'info': {'username': '', 'password': '', 'uid': ''}, 'problems': []}, 'hydro':{'info': " \
                 r"{'username': '', 'password': '', 'uid': ''}, 'problems': []}}"
 
 
