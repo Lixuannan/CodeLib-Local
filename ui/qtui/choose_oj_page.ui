@@ -45,6 +45,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_2">
+         <property name="text">
+          <string>codeforces</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>

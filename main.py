@@ -16,7 +16,8 @@ import ui
 data_stream = queue.Queue()
 
 DATA_TEMPLATE = r"{'oiclass': {'info': {'username': '', 'password': '', 'uid': ''}, 'problems': []}, 'hydro':{'info':" \
-                r" {'username': '', 'password': '', 'uid': ''}, 'problems': []}}"
+                r"{'username': '', 'password': '', 'uid': ''}, 'problems': []}, 'codeforces':  {'info': {'username': " \
+                r"'', 'password': ''}, 'problems': []}}"
 
 
 # show info
@@ -94,7 +95,8 @@ class ChooseOJ(QDialog, ui.Ui_Dialog):
             self.data.append("oiclass")
         if self.checkBox_0.checkState() == Qt.CheckState.Checked:
             self.data.append("hydro")
-
+        if self.checkBox_2.checkState() == Qt.CheckState.Checked:
+            self.data.append("codeforces")
         data_stream.put(self.data)
 
 
@@ -106,8 +108,9 @@ class Main(ui.Ui_MainWidget, QObject):
     def __init__(self):
         super().__init__()
         self.hydro_session = requests.Session()
-        self.pool = ThreadPoolExecutor(1)
         self.oiclass_session = requests.Session()
+        self.codeforces_session = requests.Session()
+        self.pool = ThreadPoolExecutor(1)
         self.db = {}
         self.log = logging.getLogger("CodeLib-Log")
         self.load_data()
@@ -138,6 +141,10 @@ class Main(ui.Ui_MainWidget, QObject):
         for i in self.db["hydro"]["problems"]:
             if keyword in f"hydro-{i['pname']}":
                 self.problems.addItem(f"hydro-{i['pname']}")
+
+        for i in self.db["codeforces"]["problems"]:
+            if keyword in f"codeforces-{i['pname']}":
+                self.problems.addItem(f"codeforces-{i['pname']}")
 
     # Show problems in a problem view
     # 将题目详情展示出来
@@ -373,6 +380,66 @@ class Main(ui.Ui_MainWidget, QObject):
 
         self.ShowInfoSignal.emit()
 
+    # Sync problems from codeforces.com
+    # 同步来自 codeforces.com 的题目
+    def sync_codeforces_problems(self):
+        new = []
+        page = self.codeforces_session.post(url="https://codeforc.es/enter", data={
+            "handleOrEmail": self.db["codeforces"]["info"]["username"],
+            "password": self.db["codeforces"]["info"]["password"]
+        }).text
+
+        if "Invalid handle/email or password" in page:
+            data_stream.put("Error - 错误")
+            data_stream.put("Invalid handle/email or password")
+            self.ShowInfoSignal.emit()
+
+        page = self.codeforces_session.get(f"https://codeforc.es/submissions/"
+                                           f"{self.db['codeforces']['info']['username']}").text
+        soup = BeautifulSoup(markup=page, features="lxml")
+        records = []
+        for i in soup.find_all(name="a", class_="view-source"):
+            if "Accepted" in i.parent.parent.text:
+                records.append(i["href"])
+
+        for i in records:
+            page = self.codeforces_session.get(f"https://codeforc.es{i}").text
+            soup = BeautifulSoup(markup=page, features="lxml")
+
+            for j in soup.find_all(name="a"):
+                if "problem/" in j["href"]:
+                    pname = j.text
+                    break
+
+            for j in self.db["codeforces"]["problems"]:
+                if j["pname"] == pname:
+                    p = True
+                    break
+                else:
+                    p = False
+
+            if not p:
+                self.db["codeforces"]["problems"].append(
+                    {"pname": pname, "code": soup.find(name="pre", class_="linenums").text}
+                )
+                print(f"Problem: Codeforces-{pname}")
+                new.append(pname)
+
+        with open("data.data", "wt") as f:
+            f.write(str(self.db))
+
+        data_stream.put("Finish - 完成")
+        data_stream.put(
+            f"""Finish Sync of Codeforces
+            完成对 Codeforces 的同步
+            Total Add {len(new)} Problems
+            共新增 {len(new)} 道题目
+            They are （他们是）：
+                {str(new)}"""
+        )
+
+        self.ShowInfoSignal.emit()
+
     # load problems from "self.db" to the GUI
     # 将 "self.db" 中的题目信息加载到页面中
     def load_list(self):
@@ -382,6 +449,9 @@ class Main(ui.Ui_MainWidget, QObject):
 
         for i in self.db["hydro"]["problems"]:
             self.problems.addItem(f"hydro-{i['pname']}")
+
+        for i in self.db["codeforces"]["problems"]:
+            self.problems.addItem(f"codeforces-{i['pname']}")
 
     # load data from "data.data" to "self.db"
     # 将 "data.data" 之中的数据读取到变量 "self.db" 中

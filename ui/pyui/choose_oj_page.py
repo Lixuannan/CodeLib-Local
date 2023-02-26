@@ -50,6 +50,11 @@ class Ui_Dialog(object):
 
         self.verticalLayout_4.addWidget(self.checkBox_0)
 
+        self.checkBox_2 = QCheckBox(Dialog)
+        self.checkBox_2.setObjectName(u"checkBox_2")
+
+        self.verticalLayout_4.addWidget(self.checkBox_2)
+
 
         self.verticalLayout_2.addLayout(self.verticalLayout_4)
 
@@ -113,6 +118,7 @@ class Ui_Dialog(object):
         self.label.setText(QCoreApplication.translate("Dialog", u"Choose the OJs you want to sync \u9009\u62e9\u4f60\u60f3\u8981\u540c\u6b65\u7684 OJ\uff1a", None))
         self.checkBox_1.setText(QCoreApplication.translate("Dialog", u"oiclass", None))
         self.checkBox_0.setText(QCoreApplication.translate("Dialog", u"hydro", None))
+        self.checkBox_2.setText(QCoreApplication.translate("Dialog", u"codeforces", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"Choose the way to sync \u540c\u6b65\u65b9\u5f0f\uff08Not support yet \u6682\u4e0d\u652f\u6301\uff09\uff1a", None))
         self.radioButton_2.setText(QCoreApplication.translate("Dialog", u"Add \u589e\u91cf\u5199\u5165", None))
         self.radioButton.setText(QCoreApplication.translate("Dialog", u"Covering \u8986\u76d6\u5199\u5165", None))
