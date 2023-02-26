@@ -15,8 +15,8 @@ import ui
 
 data_stream = queue.Queue()
 
-DATA_TEMPLATE = r"{'oiclass': {'info': {'username': '', 'password': '', 'uid': ''}, 'problems': []}, 'hydro':{'info': " \
-                r"{'username': '', 'password': '', 'uid': ''}, 'problems': []}}"
+DATA_TEMPLATE = r"{'oiclass': {'info': {'username': '', 'password': '', 'uid': ''}, 'problems': []}, 'hydro':{'info':" \
+                r" {'username': '', 'password': '', 'uid': ''}, 'problems': []}}"
 
 
 # show info
@@ -148,35 +148,39 @@ class Main(ui.Ui_MainWidget, QObject):
             if i["pname"] == info[1]:
                 ShowProblem(site=info[0], problem=info[1], code=i["code"])
 
+    # Check if the info is complete
+    # 检查信息是否完整
+    def check_info(self, platform: str):
+        if not self.db[platform]["info"]["username"]:
+            GetInfo(f"{platform}: Username 用户名: ")
+            self.db[platform]["info"]["username"] = data_stream.get()
+
+        if not self.db[platform]["info"]["password"]:
+            GetInfo(f"{platform}: Password 密码: ")
+            self.db[platform]["info"]["password"] = data_stream.get()
+
+        if platform == "oiclass" or platform == "hydro":
+            if not self.db[platform]["info"]["uid"]:
+                GetInfo(f"{platform}: UID :")
+                self.db[platform]["info"]["uid"] = data_stream.get()
+
+        with open("data.data", "wt") as f:
+            f.write(str(self.db))
+
     # Call all sync function
     # 调用所有同于同步的函数
     def sync_func(self):
         ChooseOJ()
         sync_list = data_stream.get()
         for i in sync_list:
+            print(f"Syncing: {i}")
+            self.check_info(i)
             eval(f"self.pool.submit(self.sync_{i}_problems)")
 
     # sync problems from hydro.ac
     # 同步来自 hydro.ac 的题目
     def sync_hydro_problems(self):
-        if not self.db["hydro"]["info"]["username"]:
-            GetInfo("hydro: Username 用户名: ")
-            self.db["hydro"]["info"]["username"] = data_stream.get()
-            self.load_data()
-            self.load_list()
-
-        if not self.db["hydro"]["info"]["password"]:
-            GetInfo("hydro: Password 密码: ")
-            self.db["hydro"]["info"]["password"] = data_stream.get()
-            self.load_data()
-            self.load_list()
-
-        if not self.db["hydro"]["info"]["uid"]:
-            GetInfo("hydro: UID :")
-            self.db["hydro"]["info"]["uid"] = data_stream.get()
-            self.load_data()
-            self.load_list()
-
+        new = []
         page = self.hydro_session.post(url="https://hydro.ac/login", data={
             "uname": self.db["hydro"]["info"]["username"],
             "password": self.db["hydro"]["info"]["password"],
@@ -187,9 +191,15 @@ class Main(ui.Ui_MainWidget, QObject):
             error = soup.find_all(name="div", class_="error__text-container")
             if error:
                 error = error[0].text
-                Info(title="Error - 错误", info=error)
+                print(error)
+                data_stream.put("Error - 错误")
+                data_stream.put(error)
+                self.ShowInfoSignal.emit()
             else:
-                Error("Unknown Error")
+                print("UnKnow Error")
+                data_stream.put("Error - 错误")
+                data_stream.put("UnKnow Error")
+                self.ShowInfoSignal.emit()
 
         ac_problems_server = set()
         ac_problems_local = set()
@@ -201,7 +211,7 @@ class Main(ui.Ui_MainWidget, QObject):
         soup = BeautifulSoup(markup=page, features="lxml")
 
         for i in soup.find_all(name="a"):
-            if "p/" in i["href"]:
+            if "p/" in i["href"] and "http" not in i["href"]:
                 ac_problems_server.add(i.text)
 
         problems = list(ac_problems_server - ac_problems_local)
@@ -209,16 +219,20 @@ class Main(ui.Ui_MainWidget, QObject):
         records = []
         for i in problems:
             page = self.hydro_session.get(
-                url=f"https://hydro.ac/record?uidOrName=10952&pid=H1000&tid=&lang=&status=1").text
+                url=f"https://hydro.ac/record?uidOrName=10952&pid={i}&tid=&lang=&status=1").text
             soup = BeautifulSoup(markup=page, features="lxml")
 
-            if "Oops!" in page:
-                error = soup.find_all(name="div", class_="error__text-container")
-                if error:
-                    error = error[0].text
-                    Error(error)
-                else:
-                    Error("Unknown Error")
+            if error:
+                error = error[0].text
+                print(error)
+                data_stream.put("Error - 错误")
+                data_stream.put(error)
+                self.ShowInfoSignal.emit()
+            else:
+                print("UnKnow Error")
+                data_stream.put("Error - 错误")
+                data_stream.put("UnKnow Error")
+                self.ShowInfoSignal.emit()
 
             record = soup.find_all(name="a", class_="record-status--text pass")
 
@@ -238,6 +252,8 @@ class Main(ui.Ui_MainWidget, QObject):
                 code = str(self.hydro_session.get(f"https://hydro.ac{i[0]}?download=true").content.decode())
 
             self.db["hydro"]["problems"].append({"pname": i[1], "code": code})
+            print(f"Problem: Hydro-{i[1]}")
+            new.append(i[1])
 
         with open("data.data", "wt") as f:
             f.write(str(self.db))
@@ -249,10 +265,10 @@ class Main(ui.Ui_MainWidget, QObject):
         data_stream.put(
             f"""Finish Sync of Hydro
             完成对 hydro 的同步
-            Total Add {len(problems)} Problems
-            共新增 {len(problems)} 道题目
+            Total Add {len(new)} Problems
+            共新增 {len(new)} 道题目
             They are （他们是）：
-                {str(problems)}"""
+                {str(new)}"""
         )
 
         self.ShowInfoSignal.emit()
@@ -260,30 +276,7 @@ class Main(ui.Ui_MainWidget, QObject):
     # Sync problems from oiclass.com
     # 同步来自 oiclass.com 的题目
     def sync_oiclass_problems(self):
-        if not self.db["oiclass"]["info"]["username"]:
-            GetInfo("oiclass: Username 用户名: ")
-            self.db["oiclass"]["info"]["username"] = data_stream.get()
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
-            self.load_data()
-            self.load_list()
-
-        if not self.db["oiclass"]["info"]["password"]:
-            GetInfo("oiclass: Password 密码: ")
-            self.db["oiclass"]["info"]["password"] = data_stream.get()
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
-            self.load_data()
-            self.load_list()
-
-        if not self.db["oiclass"]["info"]["uid"]:
-            GetInfo("oiclass: UID :")
-            self.db["oiclass"]["info"]["uid"] = data_stream.get()
-            with open("data.data", "wt") as f:
-                f.write(str(self.db))
-            self.load_data()
-            self.load_list()
-
+        new = []
         page = self.oiclass_session.post(url="http://oiclass.com/login/", data={
             "uname": self.db["oiclass"]["info"]["username"],
             "password": self.db["oiclass"]["info"]["password"]
@@ -294,9 +287,15 @@ class Main(ui.Ui_MainWidget, QObject):
             error = soup.find_all(name="div", class_="error__text-container")
             if error:
                 error = error[0].text
-                Info(title="Error - 错误", info=error)
+                print(error)
+                data_stream.put("Error - 错误")
+                data_stream.put(error)
+                self.ShowInfoSignal.emit()
             else:
-                Error("Unknown Error")
+                print("UnKnow Error")
+                data_stream.put("Error - 错误")
+                data_stream.put("UnKnow Error")
+                self.ShowInfoSignal.emit()
 
         page = self.oiclass_session.get(f"http://oiclass.com/user/{self.db['oiclass']['info']['uid']}").text
         soup = BeautifulSoup(markup=page, features="lxml")
@@ -305,7 +304,7 @@ class Main(ui.Ui_MainWidget, QObject):
         ac_problems_local = set()
 
         for i in problems:
-            if "/p/" in i["href"]:
+            if "/p/" in i["href"] and "http" not in i["href"]:
                 ac_problems_server.add(i.text)
 
         for i in self.db["oiclass"]["problems"]:
@@ -321,11 +320,19 @@ class Main(ui.Ui_MainWidget, QObject):
 
             if "Oops!" in page:
                 error = soup.find_all(name="div", class_="error__text-container")
-                if error:
+                if "Too frequent operations" in error:
+                    time.sleep(6)
+                elif error:
                     error = error[0].text
-                    Error(error)
+                    print(error)
+                    data_stream.put("Error - 错误")
+                    data_stream.put(error)
+                    self.ShowInfoSignal.emit()
                 else:
-                    Error("Unknown Error")
+                    print("UnKnow Error")
+                    data_stream.put("Error - 错误")
+                    data_stream.put("UnKnow Error")
+                    self.ShowInfoSignal.emit()
 
             record = soup.find_all(name="a", class_="record-status--text pass")
 
@@ -345,6 +352,8 @@ class Main(ui.Ui_MainWidget, QObject):
                 code = str(self.oiclass_session.get(f"http://oiclass.com{i[0]}?download=true").content.decode())
 
             self.db["oiclass"]["problems"].append({"pname": i[1], "code": code})
+            print(f"Problem: Oiclass-{i[1]}")
+            new.append(i[1])
 
         with open("data.data", "wt") as f:
             f.write(str(self.db))
@@ -356,10 +365,10 @@ class Main(ui.Ui_MainWidget, QObject):
         data_stream.put(
             f"""Finish Sync of Oiclass
             完成对 oiclass 的同步
-            Total Add {len(problems)} Problems
-            共新增 {len(problems)} 道题目
+            Total Add {len(new)} Problems
+            共新增 {len(new)} 道题目
             They are （他们是）：
-                {str(problems)}"""
+                {str(new)}"""
         )
 
         self.ShowInfoSignal.emit()
