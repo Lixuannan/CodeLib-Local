@@ -8,8 +8,9 @@
 
 -   [x] [oiclass](http://www.oiclass.com)
 -   [x] [HydroOJ](https://hydro.ac)
--   [ ] [CodeForces](https://codeforces.com/)
--   [ ] ….
+-   [x] [CodeForces](https://codeforces.com/)
+-   [ ] [UOJ](https://uoj.ac/)
+-   [ ] ...
 
 欢迎提交 issue 来督促我添加新 OJ 的支持哦~~
 

@@ -8,8 +8,9 @@
 
 -   [x] [oiclass](http://www.oiclass.com)
 -   [x] [HydroOJ](https://hydro.ac)
--   [ ] [Codeforces](https://codeforces.com/)
--   [ ] ….
+-   [x] [Codeforces](https://codeforces.com/)
+-   [ ] [UOJ](https://uoj.ac/)
+-   [ ] ...
 
 You can add issue to let me support more and more OJs, Have a good time ~~
 
