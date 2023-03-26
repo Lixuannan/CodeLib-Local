@@ -182,11 +182,12 @@ class Main(ui.Ui_MainWidget, QObject):
         for i in sync_list:
             print(f"Syncing: {i}")
             self.check_info(i)
-            eval(f"self.pool.submit(self.sync_{i}_problems)")
+            exec(f"self.pool.submit(self.sync_{i}_problems)")
 
     # sync problems from hydro.ac
     # 同步来自 hydro.ac 的题目
     def sync_hydro_problems(self):
+        print("Logining Hydro")
         new = []
         page = self.hydro_session.post(url="https://hydro.ac/login", data={
             "uname": self.db["hydro"]["info"]["username"],
@@ -283,6 +284,7 @@ class Main(ui.Ui_MainWidget, QObject):
     # Sync problems from oiclass.com
     # 同步来自 oiclass.com 的题目
     def sync_oiclass_problems(self):
+        print("Logining Oiclass")
         new = []
         page = self.oiclass_session.post(url="http://oiclass.com/login/", data={
             "uname": self.db["oiclass"]["info"]["username"],
@@ -383,6 +385,7 @@ class Main(ui.Ui_MainWidget, QObject):
     # Sync problems from codeforces.com
     # 同步来自 codeforces.com 的题目
     def sync_codeforces_problems(self):
+        print("Logining CF")
         new = []
         page = self.codeforces_session.post(url="https://codeforc.es/enter", data={
             "handleOrEmail": self.db["codeforces"]["info"]["username"],
