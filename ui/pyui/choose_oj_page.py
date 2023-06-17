@@ -23,7 +23,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(447, 358)
+        Dialog.resize(471, 399)
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout_2 = QVBoxLayout()
@@ -54,6 +54,11 @@ class Ui_Dialog(object):
         self.checkBox_2.setObjectName(u"checkBox_2")
 
         self.verticalLayout_4.addWidget(self.checkBox_2)
+
+        self.checkBox_3 = QCheckBox(Dialog)
+        self.checkBox_3.setObjectName(u"checkBox_3")
+
+        self.verticalLayout_4.addWidget(self.checkBox_3)
 
 
         self.verticalLayout_2.addLayout(self.verticalLayout_4)
@@ -119,6 +124,7 @@ class Ui_Dialog(object):
         self.checkBox_1.setText(QCoreApplication.translate("Dialog", u"oiclass", None))
         self.checkBox_0.setText(QCoreApplication.translate("Dialog", u"hydro", None))
         self.checkBox_2.setText(QCoreApplication.translate("Dialog", u"codeforces", None))
+        self.checkBox_3.setText(QCoreApplication.translate("Dialog", u"UOJ", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"Choose the way to sync \u540c\u6b65\u65b9\u5f0f\uff08Not support yet \u6682\u4e0d\u652f\u6301\uff09\uff1a", None))
         self.radioButton_2.setText(QCoreApplication.translate("Dialog", u"Add \u589e\u91cf\u5199\u5165", None))
         self.radioButton.setText(QCoreApplication.translate("Dialog", u"Covering \u8986\u76d6\u5199\u5165", None))

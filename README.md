@@ -9,7 +9,8 @@
 -   [x] [oiclass](http://www.oiclass.com)
 -   [x] [HydroOJ](https://hydro.ac)
 -   [x] [Codeforces](https://codeforces.com/)
--   [ ] [UOJ](https://uoj.ac/)
+-   [x] [UOJ](https://uoj.ac/)
+-   [ ] [AtCoder](https://atcoder.jp)
 -   [ ] ...
 
 You can add issue to let me support more and more OJs, Have a good time ~~

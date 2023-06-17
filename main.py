@@ -1,4 +1,4 @@
-import logging
+import json
 import os.path
 import queue
 import sys
@@ -15,9 +15,10 @@ import ui
 
 data_stream = queue.Queue()
 
-DATA_TEMPLATE = r"{'oiclass': {'info': {'username': '', 'password': '', 'uid': ''}, 'problems': []}, 'hydro':{'info':" \
-                r"{'username': '', 'password': '', 'uid': ''}, 'problems': []}, 'codeforces':  {'info': {'username': " \
-                r"'', 'password': ''}, 'problems': []}}"
+DATA_TEMPLATE = {'oiclass': {'info': {'username': '', 'password': '', 'uid': ''}, 'problems': []}, 'hydro': {
+    'info': {'username': '', 'password': '', 'uid': ''}, 'problems': []}, 'codeforces': {'info': {
+    'username': '', 'password': ''}, 'problems': []}, 'uoj': {'info': {'username': '', 'password': ''},
+                                                              'problems': []}}
 
 
 # show info
@@ -97,6 +98,8 @@ class ChooseOJ(QDialog, ui.Ui_Dialog):
             self.data.append("hydro")
         if self.checkBox_2.checkState() == Qt.CheckState.Checked:
             self.data.append("codeforces")
+        if self.checkBox_3.checkState() == Qt.CheckState.Checked:
+            self.data.append("uoj")
         data_stream.put(self.data)
 
 
@@ -110,9 +113,9 @@ class Main(ui.Ui_MainWidget, QObject):
         self.hydro_session = requests.Session()
         self.oiclass_session = requests.Session()
         self.codeforces_session = requests.Session()
+        self.uoj_session = requests.Session()
         self.pool = ThreadPoolExecutor(1)
         self.db = {}
-        self.log = logging.getLogger("CodeLib-Log")
         self.load_data()
 
     # setup everything in this class
@@ -172,7 +175,7 @@ class Main(ui.Ui_MainWidget, QObject):
                 self.db[platform]["info"]["uid"] = data_stream.get()
 
         with open("data.data", "wt") as f:
-            f.write(str(self.db))
+            f.write(json.dumps(self.db))
 
     # Call all sync function
     # 调用所有同于同步的函数
@@ -183,6 +186,55 @@ class Main(ui.Ui_MainWidget, QObject):
             print(f"Syncing: {i}")
             self.check_info(i)
             exec(f"self.pool.submit(self.sync_{i}_problems)")
+
+    # sync problems from uoj.ac
+    # 同步来自 uoj.ac 的题目
+    def sync_uoj_problems(self):
+        print("Logining UOJ")
+        new = []
+        page = self.uoj_session.post(url="https://uoj.ac/login", data={
+            "username": self.db["uoj"]["info"]["username"],
+            "password": self.db["uoj"]["info"]["password"]
+        }).text
+
+        page = self.uoj_session.get(
+            f"https://uoj.ac/submissions?submitter={self.db['uoj']['info']['username']}&min_score=100&max_score=100").text
+        soup = BeautifulSoup(markup=page, features="lxml")
+        for i in soup.find_all(name="a", class_="uoj-score"):
+            father_tr = i.parent.parent
+            for j in father_tr.find_all(name="a"):
+                if "/problem/" in j["href"]:
+                    pname = j["href"].split("/")[len(j["href"].split("/")) - 1]
+                    p = True
+                    for k in self.db["uoj"]["problems"]:
+                        if k["pname"] == pname:
+                            p = False
+                    if pname in new:
+                        p = False
+                    if p:
+                        record_page = self.uoj_session.get(f"https://uoj.ac{i['href']}").text
+                        record_soup = BeautifulSoup(markup=record_page, features="lxml")
+                        code = record_soup.find(name="code").text
+                        self.db["uoj"]["problems"].append({"pname": pname, "code": code})
+                        new.append(pname)
+
+        with open("data.data", "wt") as f:
+            f.write(json.dumps(self.db))
+
+        self.load_data()
+        self.load_list()
+
+        data_stream.put("Finish - 完成")
+        data_stream.put(
+            f"""Finish Sync of UOJ
+            完成对 UOJ 的同步
+            Total Add {len(new)} Problems
+            共新增 {len(new)} 道题目
+            They are （他们是）：
+                {str(new)}"""
+        )
+
+        self.ShowInfoSignal.emit()
 
     # sync problems from hydro.ac
     # 同步来自 hydro.ac 的题目
@@ -226,9 +278,10 @@ class Main(ui.Ui_MainWidget, QObject):
 
         records = []
         for i in problems:
-            page = self.hydro_session.get(
-                url=f"https://hydro.ac/record?uidOrName=10952&pid={i}&tid=&lang=&status=1").text
+            print(i)
+            page = self.hydro_session.get(url=f"https://hydro.ac/record?uidOrName={self.db['hydro']['info']['uid']}&pid={i}&tid=&lang=&status=1").text
             soup = BeautifulSoup(markup=page, features="lxml")
+            error = soup.find_all(name="div", class_="error__text-container")
 
             if error:
                 error = error[0].text
@@ -264,7 +317,7 @@ class Main(ui.Ui_MainWidget, QObject):
             new.append(i[1])
 
         with open("data.data", "wt") as f:
-            f.write(str(self.db))
+            f.write(json.dumps(self.db))
 
         self.load_data()
         self.load_list()
@@ -365,7 +418,7 @@ class Main(ui.Ui_MainWidget, QObject):
             new.append(i[1])
 
         with open("data.data", "wt") as f:
-            f.write(str(self.db))
+            f.write(json.dumps(self.db))
 
         self.load_data()
         self.load_list()
@@ -387,7 +440,7 @@ class Main(ui.Ui_MainWidget, QObject):
     def sync_codeforces_problems(self):
         print("Logining CF")
         new = []
-        page = self.codeforces_session.post(url="https://codeforc.es/enter", data={
+        page = self.codeforces_session.post(url="https://codeforces.com/enter", data={
             "handleOrEmail": self.db["codeforces"]["info"]["username"],
             "password": self.db["codeforces"]["info"]["password"]
         }).text
@@ -397,7 +450,7 @@ class Main(ui.Ui_MainWidget, QObject):
             data_stream.put("Invalid handle/email or password")
             self.ShowInfoSignal.emit()
 
-        page = self.codeforces_session.get(f"https://codeforc.es/submissions/"
+        page = self.codeforces_session.get(f"https://codeforces.com/submissions/"
                                            f"{self.db['codeforces']['info']['username']}").text
         soup = BeautifulSoup(markup=page, features="lxml")
         records = []
@@ -406,13 +459,16 @@ class Main(ui.Ui_MainWidget, QObject):
                 records.append(i["href"])
 
         for i in records:
-            page = self.codeforces_session.get(f"https://codeforc.es{i}").text
+            page = self.codeforces_session.get(f"https://codeforces.com{i}").text
             soup = BeautifulSoup(markup=page, features="lxml")
+            pname = None
 
             for j in soup.find_all(name="a"):
                 if "problem/" in j["href"]:
                     pname = j.text
                     break
+
+            p = False
 
             for j in self.db["codeforces"]["problems"]:
                 if j["pname"] == pname:
@@ -429,7 +485,7 @@ class Main(ui.Ui_MainWidget, QObject):
                 new.append(pname)
 
         with open("data.data", "wt") as f:
-            f.write(str(self.db))
+            f.write(json.dumps(self.db))
 
         data_stream.put("Finish - 完成")
         data_stream.put(
@@ -456,17 +512,22 @@ class Main(ui.Ui_MainWidget, QObject):
         for i in self.db["codeforces"]["problems"]:
             self.problems.addItem(f"codeforces-{i['pname']}")
 
+        for i in self.db["uoj"]["problems"]:
+            self.problems.addItem(f"uoj-{i['pname']}")
+
     # load data from "data.data" to "self.db"
     # 将 "data.data" 之中的数据读取到变量 "self.db" 中
     def load_data(self):
         with open("data.data", "rt") as f:
-            self.db = eval(f.read())
+            self.db = json.loads(f.read())
+        # print(self.db)
 
 
 if __name__ == '__main__':
+    print(DATA_TEMPLATE)
     if not os.path.isfile("data.data"):
         with open("data.data", "wt") as file:
-            file.write(DATA_TEMPLATE)
+            file.write(json.dumps(DATA_TEMPLATE))
     main = Main()
     app = QApplication()
     main_widget = QWidget()
