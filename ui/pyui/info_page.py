@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'info_page.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.5.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -22,7 +22,7 @@ class Ui_Info_Page(object):
     def setupUi(self, Info_Page):
         if not Info_Page.objectName():
             Info_Page.setObjectName(u"Info_Page")
-        Info_Page.resize(562, 461)
+        Info_Page.resize(495, 327)
         self.verticalLayout = QVBoxLayout(Info_Page)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.textBrowser = QTextBrowser(Info_Page)
@@ -52,7 +52,7 @@ class Ui_Info_Page(object):
 "hr { height: 1px; border-width: 0; }\n"
 "li.unchecked::marker { content: \"\\2610\"; }\n"
 "li.checked::marker { content: \"\\2612\"; }\n"
-"</style></head><body style=\" font-family:'.AppleSystemUIFont'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:48pt; font-weight:700;\">Loading~~~~</span></p></body></html>", None))
+"</style></head><body style=\" font-family:'Microsoft YaHei UI'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'.AppleSystemUIFont'; font-size:48pt; font-weight:700;\">Loading~~~~</span></p></body></html>", None))
     # retranslateUi
 
