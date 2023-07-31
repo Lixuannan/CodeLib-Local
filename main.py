@@ -72,7 +72,7 @@ def search():
 
     problems.sort(reverse=True)
     for i in problems:
-        main_widget.problems.addItem(f"{i[2]} - {i[1]}\t匹配度：{i[0]}")
+        main_widget.problems.addItem(f"{i[2]} - {i[1]}")
 
 
 def show_settings():
@@ -89,6 +89,9 @@ class ShowProblem(ui.show_problem.Ui_show_problem, QDialog):
         self.siteT = " - ".join(p[:-1])
         self.pid.setText(self.pidT)
         self.site.setText(self.siteT)
+
+        print(self.siteT)
+        print(self.pidT)
 
         for i in db.execute(f"SELECT * FROM problems WHERE pid = '{self.pidT}' AND site = '{self.siteT}';"):
             self.codeT = base64.b32decode(i[2].encode("utf-8")).decode("utf-8")

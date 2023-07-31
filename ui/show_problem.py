@@ -152,9 +152,7 @@ class Ui_show_problem(object):
 
         self.code = QTextBrowser(self.widget_3)
         self.code.setObjectName(u"code")
-        font1 = QFont()
-        font1.setPointSize(10)
-        self.code.setFont(font1)
+        self.code.setFont(font)
 
         self.horizontalLayout.addWidget(self.code)
 
