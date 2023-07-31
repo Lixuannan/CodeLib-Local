@@ -159,7 +159,7 @@ class Syncer:
                 print(pid)
                 code = soup.find(name="code")
                 if code is not None:
-                    code = base64.b32encode(bytes(code.text.encode("utf-8"))).decode("utf-8")
+                    code = base64.b32encode(code.text.encode("utf-8")).decode("utf-8")
                     print(code)
                     for j in db.execute(
                             f"SELECT count(*) FROM problems WHERE pid='{pid}' AND site='Oiclass - {domain}';"):
@@ -222,7 +222,7 @@ class Syncer:
                 print(pid)
                 code = soup.find(name="code")
                 if code is not None:
-                    code = base64.b32encode(bytes(code.text.encode("utf-8"))).decode("utf-8")
+                    code = base64.b32encode(code.text.encode("utf-8")).decode("utf-8")
                     print(code)
                     for j in db.execute(
                             f"SELECT count(*) FROM problems WHERE pid='{pid}' AND site='HydroOJ - {domain}';"):
@@ -268,7 +268,7 @@ class Syncer:
                 print(pid)
                 code = soup.find(name="code")
                 if code is not None:
-                    code = base64.b32encode(bytes(code.text.encode("utf-8"))).decode("utf-8")
+                    code = base64.b32encode(code.text.encode("utf-8")).decode("utf-8")
                     print(code)
                     for j in db.execute(f"SELECT count(*) FROM problems WHERE pid='{pid}' AND site='UOJ';"):
                         cnt = j[0]
@@ -313,7 +313,7 @@ class Syncer:
                 print(pid)
                 code = soup.find(name="pre", id="program-source-text")
                 if code is not None:
-                    code = base64.b32encode(bytes(code.text.encode("utf-8"))).decode("utf-8")
+                    code = base64.b32encode(code.text.encode("utf-8")).decode("utf-8")
                     print(code)
                     for j in db.execute(f"SELECT count(*) FROM problems WHERE pid='{pid}' AND site='Codeforces';"):
                         cnt = j[0]

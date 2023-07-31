@@ -17,8 +17,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QComboBox,
     QDialog, QDialogButtonBox, QGridLayout, QHBoxLayout,
-    QLabel, QLineEdit, QScrollArea, QSizePolicy,
-    QTabWidget, QVBoxLayout, QWidget)
+    QLabel, QLineEdit, QPushButton, QScrollArea,
+    QSizePolicy, QTabWidget, QVBoxLayout, QWidget)
 
 class Ui_settingPage(object):
     def setupUi(self, settingPage):
@@ -47,7 +47,7 @@ class Ui_settingPage(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.loginWhenStartL = QLabel(self.loginWhenStartup)
         self.loginWhenStartL.setObjectName(u"loginWhenStartL")
-        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.loginWhenStartL.sizePolicy().hasHeightForWidth())
@@ -60,8 +60,11 @@ class Ui_settingPage(object):
 
         self.checkBox = QCheckBox(self.loginWhenStartup)
         self.checkBox.setObjectName(u"checkBox")
-        sizePolicy.setHeightForWidth(self.checkBox.sizePolicy().hasHeightForWidth())
-        self.checkBox.setSizePolicy(sizePolicy)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.checkBox.sizePolicy().hasHeightForWidth())
+        self.checkBox.setSizePolicy(sizePolicy1)
 
         self.horizontalLayout.addWidget(self.checkBox)
 
@@ -91,6 +94,27 @@ class Ui_settingPage(object):
 
 
         self.verticalLayout_4.addWidget(self.Language)
+
+        self.reset_database = QWidget(self.scrollAreaWidgetContents_2)
+        self.reset_database.setObjectName(u"reset_database")
+        self.horizontalLayout_11 = QHBoxLayout(self.reset_database)
+        self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
+        self.resetDbL = QLabel(self.reset_database)
+        self.resetDbL.setObjectName(u"resetDbL")
+        self.resetDbL.setFont(font)
+
+        self.horizontalLayout_11.addWidget(self.resetDbL)
+
+        self.resetDbButton = QPushButton(self.reset_database)
+        self.resetDbButton.setObjectName(u"resetDbButton")
+        sizePolicy.setHeightForWidth(self.resetDbButton.sizePolicy().hasHeightForWidth())
+        self.resetDbButton.setSizePolicy(sizePolicy)
+        self.resetDbButton.setFont(font)
+
+        self.horizontalLayout_11.addWidget(self.resetDbButton)
+
+
+        self.verticalLayout_4.addWidget(self.reset_database)
 
         self.generic_tab.setWidget(self.scrollAreaWidgetContents_2)
 
@@ -282,8 +306,8 @@ class Ui_settingPage(object):
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.label = QLabel(self.scrollAreaWidgetContents_3)
         self.label.setObjectName(u"label")
-        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy)
+        sizePolicy1.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy1)
         font2 = QFont()
         font2.setPointSize(12)
         self.label.setFont(font2)
@@ -296,35 +320,35 @@ class Ui_settingPage(object):
         self.gridLayout.setObjectName(u"gridLayout")
         self.cfCheckBox = QCheckBox(self.widget)
         self.cfCheckBox.setObjectName(u"cfCheckBox")
-        sizePolicy.setHeightForWidth(self.cfCheckBox.sizePolicy().hasHeightForWidth())
-        self.cfCheckBox.setSizePolicy(sizePolicy)
+        sizePolicy1.setHeightForWidth(self.cfCheckBox.sizePolicy().hasHeightForWidth())
+        self.cfCheckBox.setSizePolicy(sizePolicy1)
         self.cfCheckBox.setFont(font1)
 
         self.gridLayout.addWidget(self.cfCheckBox, 2, 0, 1, 1)
 
-        self.hydroCheckBox = QCheckBox(self.widget)
-        self.hydroCheckBox.setObjectName(u"hydroCheckBox")
-        sizePolicy.setHeightForWidth(self.hydroCheckBox.sizePolicy().hasHeightForWidth())
-        self.hydroCheckBox.setSizePolicy(sizePolicy)
-        self.hydroCheckBox.setFont(font1)
-
-        self.gridLayout.addWidget(self.hydroCheckBox, 1, 0, 1, 1)
-
         self.oicCheckBox = QCheckBox(self.widget)
         self.oicCheckBox.setObjectName(u"oicCheckBox")
-        sizePolicy.setHeightForWidth(self.oicCheckBox.sizePolicy().hasHeightForWidth())
-        self.oicCheckBox.setSizePolicy(sizePolicy)
+        sizePolicy1.setHeightForWidth(self.oicCheckBox.sizePolicy().hasHeightForWidth())
+        self.oicCheckBox.setSizePolicy(sizePolicy1)
         self.oicCheckBox.setFont(font1)
 
-        self.gridLayout.addWidget(self.oicCheckBox, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.oicCheckBox, 0, 0, 1, 1)
+
+        self.hydroCheckBox = QCheckBox(self.widget)
+        self.hydroCheckBox.setObjectName(u"hydroCheckBox")
+        sizePolicy1.setHeightForWidth(self.hydroCheckBox.sizePolicy().hasHeightForWidth())
+        self.hydroCheckBox.setSizePolicy(sizePolicy1)
+        self.hydroCheckBox.setFont(font1)
+
+        self.gridLayout.addWidget(self.hydroCheckBox, 0, 1, 1, 1)
 
         self.uojCheckBox = QCheckBox(self.widget)
         self.uojCheckBox.setObjectName(u"uojCheckBox")
-        sizePolicy.setHeightForWidth(self.uojCheckBox.sizePolicy().hasHeightForWidth())
-        self.uojCheckBox.setSizePolicy(sizePolicy)
+        sizePolicy1.setHeightForWidth(self.uojCheckBox.sizePolicy().hasHeightForWidth())
+        self.uojCheckBox.setSizePolicy(sizePolicy1)
         self.uojCheckBox.setFont(font1)
 
-        self.gridLayout.addWidget(self.uojCheckBox, 1, 2, 1, 1)
+        self.gridLayout.addWidget(self.uojCheckBox, 0, 2, 1, 1)
 
 
         self.verticalLayout_7.addWidget(self.widget)
@@ -361,6 +385,8 @@ class Ui_settingPage(object):
         self.LanguageL.setText(QCoreApplication.translate("settingPage", u"\u8bed\u8a00\uff1a", None))
         self.LanguageComboBox.setItemText(0, QCoreApplication.translate("settingPage", u"Simplified Chinese", None))
 
+        self.resetDbL.setText(QCoreApplication.translate("settingPage", u"\u91cd\u7f6e\u6570\u636e\u5e93\uff1a", None))
+        self.resetDbButton.setText(QCoreApplication.translate("settingPage", u"\u91cd\u7f6e", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.generic), QCoreApplication.translate("settingPage", u"\u901a\u7528", None))
         self.oicAccL.setText(QCoreApplication.translate("settingPage", u"Oiclass \u8d26\u53f7\uff1a", None))
         self.oicPwdL.setText(QCoreApplication.translate("settingPage", u"Oiclass \u5bc6\u7801\uff1a", None))
@@ -373,8 +399,8 @@ class Ui_settingPage(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.account), QCoreApplication.translate("settingPage", u"\u8d26\u53f7", None))
         self.label.setText(QCoreApplication.translate("settingPage", u"\u9ed8\u8ba4\u540c\u6b65\u7684 OJ\uff1a", None))
         self.cfCheckBox.setText(QCoreApplication.translate("settingPage", u"Codeforces", None))
-        self.hydroCheckBox.setText(QCoreApplication.translate("settingPage", u"HydroOJ", None))
         self.oicCheckBox.setText(QCoreApplication.translate("settingPage", u"Oiclass", None))
+        self.hydroCheckBox.setText(QCoreApplication.translate("settingPage", u"HydroOJ", None))
         self.uojCheckBox.setText(QCoreApplication.translate("settingPage", u"UOJ", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.sync), QCoreApplication.translate("settingPage", u"\u540c\u6b65", None))
     # retranslateUi

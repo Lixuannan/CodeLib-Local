@@ -1,11 +1,26 @@
+import base64
 import sys
 import os
 import sqlite3
 
+import pyperclip
 from PySide6.QtWidgets import QApplication, QWidget, QDialog
 
 import syncer
+import ui.show_problem
 from ui import main_window, setting, chooseOJ, massage
+
+RESET_SQL = ("DROP TABLE problems; DROP TABLE settings; DROP TABLE default_sync; CREATE TABLE problems( pid text, "
+             "site text, code text); CREATE TABLE settings( option TEXT, value TEXT, number_i INT, number_f FLOAT); "
+             "INSERT INTO settings VALUES('loginWhenStartup',NULL,1,NULL); INSERT INTO settings VALUES("
+             "'oiclassUsername','',NULL,NULL); INSERT INTO settings VALUES('oiclassPassword','',NULL,NULL); INSERT "
+             "INTO settings VALUES('hydroojUsername','',NULL,NULL); INSERT INTO settings VALUES('hydroojPassword','',"
+             "NULL,NULL); INSERT INTO settings VALUES('uojUsername','',NULL,NULL); INSERT INTO settings VALUES("
+             "'uojPassword','',NULL,NULL); INSERT INTO settings VALUES('codeforcesUsername','',NULL,NULL); INSERT "
+             "INTO settings VALUES('codeforcesPassword','',NULL,NULL); INSERT INTO settings VALUES('language',"
+             "'Simplified Chinese',NULL,NULL); CREATE TABLE default_sync( site TEXT, onOroff BOOLEAN); INSERT INTO "
+             "default_sync VALUES('Oiclass',0); INSERT INTO default_sync VALUES('HydroOJ',0); INSERT INTO "
+             "default_sync VALUES('UOJ',0); INSERT INTO default_sync VALUES('Codeforces',0);")
 
 
 def load_list():
@@ -29,9 +44,62 @@ def save_settings():
     db.commit()
 
 
+def lcs(a: str, b: str) -> int:
+    m, n = len(a), len(b)
+    f = [[0] * (n + 1) for _ in range(m + 1)]
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if a[i - 1] == b[j - 1]:
+                f[i][j] = f[i - 1][j - 1] + 1
+            else:
+                f[i][j] = max(f[i - 1][j], f[i][j - 1])
+
+    return f[m][n]
+
+
+def search():
+    search_text = main_widget.keyword.text()
+    if search_text == "":
+        load_list()
+        return
+    main_widget.problems.clear()
+    problems = []
+    for i in db.execute("SELECT * FROM problems;"):
+        x = lcs(search_text, i[0] + i[1] + base64.b32decode(i[2].encode("utf-8")).decode("utf-8"))
+        if x > 0:
+            problems.append((x, i[0], i[1]))
+
+    problems.sort(reverse=True)
+    for i in problems:
+        main_widget.problems.addItem(f"{i[2]} - {i[1]}\t匹配度：{i[0]}")
+
+
 def show_settings():
     for i in settings:
         print(f"{i}: {settings[i]}")
+
+
+class ShowProblem(ui.show_problem.Ui_show_problem, QDialog):
+    def __init__(self, problem):
+        super(ShowProblem, self).__init__()
+        self.setupUi(self)
+        p = problem.split(" - ")
+        self.pidT = p[-1]
+        self.siteT = " - ".join(p[:-1])
+        self.pid.setText(self.pidT)
+        self.site.setText(self.siteT)
+
+        for i in db.execute(f"SELECT * FROM problems WHERE pid = '{self.pidT}' AND site = '{self.siteT}';"):
+            self.codeT = base64.b32decode(i[2].encode("utf-8")).decode("utf-8")
+
+        self.code.setText(self.codeT)
+        self.copy.clicked.connect(self.cp)
+
+        self.exec()
+
+    def cp(self):
+        pyperclip.copy(self.codeT)
 
 
 class Setting(setting.Ui_settingPage, QDialog):
@@ -39,6 +107,8 @@ class Setting(setting.Ui_settingPage, QDialog):
         print(settings)
         super(Setting, self).__init__()
         self.setupUi(self)
+        self.resetDbButton.clicked.connect(
+            lambda: Massage("确认重置数据库？", accept=lambda: (db.executescript(RESET_SQL), db.commit())))
         self.dialogButtonBox.accepted.connect(self.save_and_exit)
         self.load_settings()
 
@@ -209,6 +279,8 @@ if __name__ == '__main__':
     main_widget.setting.clicked.connect(lambda: Setting())
     main_widget.sync.clicked.connect(lambda: ChooseOJ())
     main_widget.refresh.clicked.connect(load_list)
+    main_widget.keyword.returnPressed.connect(search)
+    main_widget.problems.doubleClicked.connect(lambda: ShowProblem(main_widget.problems.selectedItems()[0].text()))
 
     load_list()
 

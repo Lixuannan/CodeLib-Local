@@ -9,17 +9,16 @@
 ################################################################################
 
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-                            QMetaObject, QObject, QPoint, QRect,
-                            QSize, QTime, QUrl, Qt)
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-                           QFont, QFontDatabase, QGradient, QIcon,
-                           QImage, QKeySequence, QLinearGradient, QPainter,
-                           QPalette, QPixmap, QRadialGradient, QTransform)
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QLineEdit,
-                               QListWidget, QListWidgetItem, QSizePolicy, QToolButton,
-                               QVBoxLayout, QWidget)
+    QListWidget, QListWidgetItem, QSizePolicy, QToolButton,
+    QVBoxLayout, QWidget)
 import resources_rc
-
 
 class Ui_mainWindow(object):
     def setupUi(self, mainWindow):
@@ -61,8 +60,8 @@ class Ui_mainWindow(object):
         sizePolicy.setHeightForWidth(self.refresh.sizePolicy().hasHeightForWidth())
         self.refresh.setSizePolicy(sizePolicy)
         self.refresh.setStyleSheet(u"QToolButton#refresh {\n"
-                                   "    border-image: url(:/icon/\u5237\u65b0.png)\n"
-                                   "}")
+"    border-image: url(:/icon/\u5237\u65b0.png)\n"
+"}")
 
         self.horizontalLayout.addWidget(self.refresh)
 
@@ -72,8 +71,8 @@ class Ui_mainWindow(object):
         self.sync.setSizePolicy(sizePolicy)
         self.sync.setFont(font)
         self.sync.setStyleSheet(u"QToolButton#sync {\n"
-                                "    border-image: url(:/icon/\u4e91\u540c\u6b65.png)\n"
-                                "}")
+"    border-image: url(:/icon/\u4e91\u540c\u6b65.png)\n"
+"}")
 
         self.horizontalLayout.addWidget(self.sync)
 
@@ -83,10 +82,11 @@ class Ui_mainWindow(object):
         self.setting.setSizePolicy(sizePolicy)
         self.setting.setFont(font)
         self.setting.setStyleSheet(u"QToolButton#setting {\n"
-                                   "    border-image: url(:/icon/\u8bbe\u7f6e.png)\n"
-                                   "}")
+"    border-image: url(:/icon/\u8bbe\u7f6e.png)\n"
+"}")
 
         self.horizontalLayout.addWidget(self.setting)
+
 
         self.verticalLayout.addLayout(self.horizontalLayout)
 
@@ -98,10 +98,10 @@ class Ui_mainWindow(object):
 
         self.verticalLayout.addWidget(self.problems)
 
+
         self.retranslateUi(mainWindow)
 
         QMetaObject.connectSlotsByName(mainWindow)
-
     # setupUi
 
     def retranslateUi(self, mainWindow):
@@ -111,3 +111,4 @@ class Ui_mainWindow(object):
         self.sync.setText("")
         self.setting.setText("")
     # retranslateUi
+
