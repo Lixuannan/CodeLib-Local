@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icon">
+    <file>icon.png</file>
     <file>复制.png</file>
     <file>设置.png</file>
     <file>刷新.png</file>

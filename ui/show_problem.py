@@ -25,6 +25,9 @@ class Ui_show_problem(object):
         if not show_problem.objectName():
             show_problem.setObjectName(u"show_problem")
         show_problem.resize(505, 440)
+        icon = QIcon()
+        icon.addFile(u":/icon/icon.png", QSize(), QIcon.Normal, QIcon.Off)
+        show_problem.setWindowIcon(icon)
         self.verticalLayout = QVBoxLayout(show_problem)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.widget = QWidget(show_problem)

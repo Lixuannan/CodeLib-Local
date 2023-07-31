@@ -25,7 +25,7 @@ RESET_SQL = ("DROP TABLE problems; DROP TABLE settings; DROP TABLE default_sync;
 
 def load_list():
     main_widget.problems.clear()
-    for i in db.execute("SELECT * FROM problems;"):
+    for i in db.execute("SELECT * FROM problems ORDER BY site, pid;"):
         main_widget.problems.addItem(f"{i[1]} - {i[0]}")
 
 

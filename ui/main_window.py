@@ -25,6 +25,9 @@ class Ui_mainWindow(object):
         if not mainWindow.objectName():
             mainWindow.setObjectName(u"mainWindow")
         mainWindow.resize(575, 601)
+        icon = QIcon()
+        icon.addFile(u":/icon/icon.png", QSize(), QIcon.Normal, QIcon.Off)
+        mainWindow.setWindowIcon(icon)
         self.verticalLayout = QVBoxLayout(mainWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()

@@ -1,12 +1,11 @@
-import sqlite3
-import os
 import base64
+import sqlite3
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 
-from requests import Session
 from bs4 import BeautifulSoup
+from requests import Session
 
 
 class Syncer:

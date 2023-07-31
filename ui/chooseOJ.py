@@ -18,12 +18,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDialog,
     QDialogButtonBox, QScrollArea, QSizePolicy, QVBoxLayout,
     QWidget)
+import resources_rc
 
 class Ui_chooseOJ(object):
     def setupUi(self, chooseOJ):
         if not chooseOJ.objectName():
             chooseOJ.setObjectName(u"chooseOJ")
         chooseOJ.resize(385, 195)
+        icon = QIcon()
+        icon.addFile(u":/icon/icon.png", QSize(), QIcon.Normal, QIcon.Off)
+        chooseOJ.setWindowIcon(icon)
         self.verticalLayout = QVBoxLayout(chooseOJ)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.scrollArea = QScrollArea(chooseOJ)

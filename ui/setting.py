@@ -19,12 +19,16 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QComboB
     QDialog, QDialogButtonBox, QGridLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QScrollArea,
     QSizePolicy, QTabWidget, QVBoxLayout, QWidget)
+import resources_rc
 
 class Ui_settingPage(object):
     def setupUi(self, settingPage):
         if not settingPage.objectName():
             settingPage.setObjectName(u"settingPage")
         settingPage.resize(416, 355)
+        icon = QIcon()
+        icon.addFile(u":/icon/icon.png", QSize(), QIcon.Normal, QIcon.Off)
+        settingPage.setWindowIcon(icon)
         self.verticalLayout = QVBoxLayout(settingPage)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.tabWidget = QTabWidget(settingPage)

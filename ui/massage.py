@@ -17,12 +17,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
     QSizePolicy, QTextBrowser, QVBoxLayout, QWidget)
+import resources_rc
 
 class Ui_massagePage(object):
     def setupUi(self, massagePage):
         if not massagePage.objectName():
             massagePage.setObjectName(u"massagePage")
-        massagePage.resize(430, 279)
+        massagePage.resize(435, 210)
+        icon = QIcon()
+        icon.addFile(u":/icon/icon.png", QSize(), QIcon.Normal, QIcon.Off)
+        massagePage.setWindowIcon(icon)
         self.verticalLayout = QVBoxLayout(massagePage)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.massageBrowser = QTextBrowser(massagePage)
