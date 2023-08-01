@@ -1,6 +1,6 @@
 import base64
 import sys
-import os
+import os.path
 import sqlite3
 
 import pyperclip
@@ -246,6 +246,9 @@ class ChooseOJ(chooseOJ.Ui_chooseOJ, QDialog):
 
 
 if __name__ == '__main__':
+    if not os.path.isfile("data.db"):
+        os.rename("data.db.template", "data.db")
+
     settings = {}
     default_site = {}
     db = sqlite3.connect("data.db")
