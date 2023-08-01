@@ -1,10 +1,10 @@
 # CodeLib-Local 
 
-#### 我自用的 OJ 题目代码仓库
+### 我自用的 OJ 题目代码仓库
 
 [English](./README.md) [简体中文](./README_zh-CN.md)
 
-### 支持的 OJ：
+## 支持的 OJ：
 
 -   [x] [oiclass](http://www.oiclass.com)
 -   [x] [HydroOJ](https://hydro.ac)
@@ -15,13 +15,13 @@
 
 欢迎提交 issue 来督促我添加新 OJ 的支持哦~~
 
-### 使用方法：
+## 使用方法：
 
-#### Windows：
+### Windows：
 
 打开发行版页面，下载并安装即可。
 
-#### 其它系统：
+### 其它系统：
 
 ```shell
 git clone https://github.com/Lixuannan/CodeLib-Local.git # 也可以是 https://gitee.com/lixuannan/CodeLib-Local.git
