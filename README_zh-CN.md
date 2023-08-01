@@ -17,6 +17,12 @@
 
 ### 使用方法：
 
+#### Windows：
+
+打开发行版页面，下载并安装即可。
+
+#### 其它系统：
+
 ```shell
 git clone https://github.com/Lixuannan/CodeLib-Local.git # 也可以是 https://gitee.com/lixuannan/CodeLib-Local.git
 cd CodeLib-Local
