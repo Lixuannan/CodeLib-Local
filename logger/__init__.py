@@ -5,7 +5,7 @@ class Logger:
     def __init__(self):
         self.logger = logging.getLogger("CodeLib-Local Logger")
 
-        self.format = "[%(asctime)s - %(levelname)s]  %(message)s""
+        self.format = "[%(asctime)s - %(levelname)s]  %(message)s"
 
         self.file_handler = logging.FileHandler("log.txt")
         self.stream_handler = logging.StreamHandler()
