@@ -1,6 +1,7 @@
 import base64
 import sqlite3
 import time
+import queue
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 
@@ -13,6 +14,7 @@ class Syncer:
             self,
             settings: dict
     ):
+        self.log_stream = queue.Queue()
         self.sessions = {
             "Oiclass": Session(),
             "HydroOJ": Session(),
@@ -123,7 +125,7 @@ class Syncer:
             db = sqlite3.connect("data.db")
             if not self.check_login("Oiclass"):
                 return 1
-            print(f"Syncing Oiclass - {domain}")
+            self.log_stream.put(f"Syncing Oiclass - {domain}")
             pg = 0
             record_urls = []
             while True:
@@ -140,9 +142,9 @@ class Syncer:
                 if not reach:
                     break
 
-            print(record_urls)
+            self.log_stream.put(str(record_urls))
             for i in record_urls:
-                print(f"http://www.oiclass.com{i}")
+                self.log_stream.put(f"http://www.oiclass.com{i}")
                 page = self.sessions["Oiclass"].get(f"http://www.oiclass.com{i}").text
                 if "Oops!" in page or "앗..!" in page:
                     if "View hidden problems" in page:
@@ -151,27 +153,27 @@ class Syncer:
                         time.sleep(10)
                         page = self.sessions["Oiclass"].get(f"http://www.oiclass.com{i}").text
                 soup = BeautifulSoup(features="lxml", markup=page)
+                pid = ""
                 for j in soup.find_all(name="a"):
                     if "/p/" in j["href"]:
                         pid = j.text
                         break
-                print(pid)
+                self.log_stream.put(str(pid))
                 code = soup.find(name="code")
                 if code is not None:
                     code = base64.b32encode(code.text.encode("utf-8")).decode("utf-8")
-                    print(code)
+                    self.log_stream.put(code)
                     for j in db.execute(
                             f"SELECT count(*) FROM problems WHERE pid='{pid}' AND site='Oiclass - {domain}';"):
                         cnt = j[0]
                     if cnt == 0:
-                        print(
-                            f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'Oiclass - {domain}', '{code}');")
+                        self.log_stream.put(f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'Oiclass - {domain}', '{code}');")
                         db.execute(
                             f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'Oiclass - {domain}', '{code}');")
                         db.commit()
         except Exception:
             traceback.print_exc()
-        print(f"Done with Oiclass - {domain}")
+        self.log_stream.put(f"Done with Oiclass - {domain}")
 
         for i in self.oiclass_domain:
             if not self.oiclass_domain[i]:

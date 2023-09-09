@@ -8,7 +8,8 @@ from PySide6.QtWidgets import QApplication, QWidget, QDialog
 
 import syncer
 import ui.show_problem
-from ui import main_window, setting, chooseOJ, massage
+from logger import Logger
+from ui import main_window, setting, chooseOJ, massage, log
 
 RESET_SQL = ("DROP TABLE problems; DROP TABLE settings; DROP TABLE default_sync; CREATE TABLE problems( pid text, "
              "site text, code text); CREATE TABLE settings( option TEXT, value TEXT, number_i INT, number_f FLOAT); "
@@ -21,6 +22,7 @@ RESET_SQL = ("DROP TABLE problems; DROP TABLE settings; DROP TABLE default_sync;
              "'Simplified Chinese',NULL,NULL); CREATE TABLE default_sync( site TEXT, onOroff BOOLEAN); INSERT INTO "
              "default_sync VALUES('Oiclass',0); INSERT INTO default_sync VALUES('HydroOJ',0); INSERT INTO "
              "default_sync VALUES('UOJ',0); INSERT INTO default_sync VALUES('Codeforces',0);")
+LOGGER = Logger()
 
 
 def load_list():
@@ -140,7 +142,7 @@ class Setting(setting.Ui_settingPage, QDialog):
         print(settings)
         p = sys.executable
         os.execl(p, p, *sys.argv)
-        sys.exit()
+        sys.exit(0)
 
     def load_settings(self):
         self.checkBox.setChecked(settings["loginWhenStartup"])
@@ -181,6 +183,11 @@ class Massage(massage.Ui_massagePage, QDialog):
 
         self.massageBrowser.setText(massage_text)
         self.exec()
+
+
+class Log:
+    def __init__(self):
+        LOGGER.show()
 
 
 class ChooseOJ(chooseOJ.Ui_chooseOJ, QDialog):
@@ -242,6 +249,7 @@ class ChooseOJ(chooseOJ.Ui_chooseOJ, QDialog):
                     Massage(massage_text="检测到 Codeforces 账号未登录，是否登录并继续同步？",
                             accept=lambda: (s.login(site="Codeforces"),
                                             s.sync("Codeforces")))
+
         load_list()
 
 
