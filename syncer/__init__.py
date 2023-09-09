@@ -1,20 +1,23 @@
 import base64
 import sqlite3
 import time
-import queue
+import sys
+import io
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 
 from bs4 import BeautifulSoup
 from requests import Session
 
+from logger import Logger
+
 
 class Syncer:
     def __init__(
             self,
-            settings: dict
+            settings: dict,
+            LOGGER: Logger
     ):
-        self.log_stream = queue.Queue()
         self.sessions = {
             "Oiclass": Session(),
             "HydroOJ": Session(),
@@ -29,8 +32,9 @@ class Syncer:
         }
         self.oiclass_domain = {}
         self.hydrooj_domain = {}
-        self.pool = ThreadPoolExecutor(max_workers=1)
+        self.pool = ThreadPoolExecutor(max_workers=4)
         self.settings = settings
+        self.LOGGER = LOGGER
 
     def login(self, site: str):
         match site:
@@ -60,7 +64,7 @@ class Syncer:
         for i in soup.find_all(class_="typo-a", name="a"):
             self.oiclass_domain[i["href"].split("/")[2]] = False
 
-        print(self.oiclass_domain)
+        self.LOGGER.log(20, str(self.oiclass_domain))
 
         self.logan["Oiclass"] = True
         return 0
@@ -80,7 +84,7 @@ class Syncer:
         for i in soup.find_all(class_="typo-a", name="a"):
             self.hydrooj_domain[i["href"].split("/")[2]] = False
 
-        print(self.hydrooj_domain)
+        self.LOGGER.log(20, str(self.hydrooj_domain))
 
         self.logan["HydroOJ"] = True
         return 0
@@ -102,6 +106,9 @@ class Syncer:
             "handleOrEmail": self.settings["codeforcesUsername"],
             "password": self.settings["codeforcesPassword"],
             "remember": "on"
+        }, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69'
         })
         self.logan["Codeforces"] = True
 
@@ -125,7 +132,7 @@ class Syncer:
             db = sqlite3.connect("data.db")
             if not self.check_login("Oiclass"):
                 return 1
-            self.log_stream.put(f"Syncing Oiclass - {domain}")
+            self.LOGGER.log(30, f"Syncing Oiclass - {domain}")
             pg = 0
             record_urls = []
             while True:
@@ -142,9 +149,9 @@ class Syncer:
                 if not reach:
                     break
 
-            self.log_stream.put(str(record_urls))
+            self.LOGGER.log(10, str(record_urls))
             for i in record_urls:
-                self.log_stream.put(f"http://www.oiclass.com{i}")
+                self.LOGGER.log(10, f"http://www.oiclass.com{i}")
                 page = self.sessions["Oiclass"].get(f"http://www.oiclass.com{i}").text
                 if "Oops!" in page or "앗..!" in page:
                     if "View hidden problems" in page:
@@ -158,22 +165,23 @@ class Syncer:
                     if "/p/" in j["href"]:
                         pid = j.text
                         break
-                self.log_stream.put(str(pid))
+                self.LOGGER.log(10, str(pid))
                 code = soup.find(name="code")
                 if code is not None:
                     code = base64.b32encode(code.text.encode("utf-8")).decode("utf-8")
-                    self.log_stream.put(code)
+
                     for j in db.execute(
                             f"SELECT count(*) FROM problems WHERE pid='{pid}' AND site='Oiclass - {domain}';"):
                         cnt = j[0]
                     if cnt == 0:
-                        self.log_stream.put(f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'Oiclass - {domain}', '{code}');")
+                        self.LOGGER.log(10,
+                                        f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'Oiclass - {domain}', '{code}');")
                         db.execute(
                             f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'Oiclass - {domain}', '{code}');")
                         db.commit()
         except Exception:
             traceback.print_exc()
-        self.log_stream.put(f"Done with Oiclass - {domain}")
+        self.LOGGER.log(30, f"Done with Oiclass - {domain}")
 
         for i in self.oiclass_domain:
             if not self.oiclass_domain[i]:
@@ -188,7 +196,7 @@ class Syncer:
             db = sqlite3.connect("data.db")
             if not self.check_login("HydroOJ"):
                 return 1
-            print(f"Syncing HydroOJ - {domain}")
+            self.LOGGER.log(30, f"Syncing HydroOJ - {domain}")
             pg = 0
             record_urls = []
             while True:
@@ -205,9 +213,9 @@ class Syncer:
                 if not reach:
                     break
 
-            print(record_urls)
+            self.LOGGER.log(10, str(record_urls))
             for i in record_urls:
-                print(f"https://hydro.ac{i}")
+                self.LOGGER.log(10, f"https://hydro.ac{i}")
                 page = self.sessions["HydroOJ"].get(f"https://hydro.ac{i}").text
                 if "Oops!" in page or "앗..!" in page:
                     if "View hidden problems" in page:
@@ -220,23 +228,23 @@ class Syncer:
                     if "/p/" in j["href"]:
                         pid = j.text
                         break
-                print(pid)
+                self.LOGGER.log(10, str(pid))
                 code = soup.find(name="code")
                 if code is not None:
                     code = base64.b32encode(code.text.encode("utf-8")).decode("utf-8")
-                    print(code)
+
                     for j in db.execute(
                             f"SELECT count(*) FROM problems WHERE pid='{pid}' AND site='HydroOJ - {domain}';"):
                         cnt = j[0]
                     if cnt == 0:
-                        print(
-                            f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'HydroOJ - {domain}', '{code}');")
+                        self.LOGGER.log(10, f"INSERT INTO problems (pid, site, code) "
+                                            f"VALUES ('{pid}', 'HydroOJ - {domain}', '{code}');")
                         db.execute(
                             f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'HydroOJ - {domain}', '{code}');")
                         db.commit()
         except Exception:
             traceback.print_exc()
-        print(f"Done with HydroOJ - {domain}"),
+        self.LOGGER.log(30, f"Done with HydroOJ - {domain}")
 
         for i in self.hydrooj_domain:
             if not self.hydrooj_domain[i]:
@@ -254,10 +262,10 @@ class Syncer:
             for i in soup.find_all(name="a", class_="uoj-score"):
                 record_urls.append(i["href"])
 
-            print(record_urls)
+            self.LOGGER.log(10, str(record_urls))
 
             for i in record_urls:
-                print(f"https://uoj.ac{i}")
+                self.LOGGER.log(10, f"https://uoj.ac{i}")
                 page = self.sessions["UOJ"].get(f"https://uoj.ac{i}").text
                 soup = BeautifulSoup(features="lxml", markup=page)
 
@@ -266,20 +274,21 @@ class Syncer:
                         pid = j.text
                         break
 
-                print(pid)
+                self.LOGGER.log(10, pid)
                 code = soup.find(name="code")
                 if code is not None:
                     code = base64.b32encode(code.text.encode("utf-8")).decode("utf-8")
-                    print(code)
+
                     for j in db.execute(f"SELECT count(*) FROM problems WHERE pid='{pid}' AND site='UOJ';"):
                         cnt = j[0]
                     if cnt == 0:
-                        print(f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'UOJ', '{code}');")
+                        self.LOGGER.log(10,
+                                        f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'UOJ', '{code}');")
                         db.execute(
                             f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'UOJ', '{code}');")
                         db.commit()
 
-            print("Done with UOJ")
+            self.LOGGER.log(30, "Done with UOJ")
         except Exception:
             traceback.print_exc()
 
@@ -291,39 +300,44 @@ class Syncer:
             page = self.sessions["Codeforces"].post(
                 f"https://codeforces.com/submissions/{self.settings['codeforcesUsername']}", data={
                     "verdictName": "OK",
+                }, headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                                  'Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69',
                 }).text
             soup = BeautifulSoup(features="lxml", markup=page)
             record_urls = []
 
-            for i in soup.find_all(name="a", class_="view-source"):
+            self.LOGGER.log(30, "Syncing Codeforces")
+
+            for i in soup.find_all(name="a"):
                 if "/contest/" in i["href"]:
                     record_urls.append(i["href"])
 
-            print(record_urls)
+            self.LOGGER.log(10, str(record_urls))
 
             for i in record_urls:
-                print(f"https://codeforces.com{i}")
+                self.LOGGER.log(10, f"https://codeforces.com{i}")
                 page = self.sessions["Codeforces"].get(f"https://codeforces.com{i}").text
                 soup = BeautifulSoup(features="lxml", markup=page)
+                pid = ""
 
                 for j in soup.find_all(name="a"):
                     if "/problem/" in j["href"]:
                         pid = j.text
                         break
 
-                print(pid)
+                self.LOGGER.log(10, pid)
                 code = soup.find(name="pre", id="program-source-text")
                 if code is not None:
                     code = base64.b32encode(code.text.encode("utf-8")).decode("utf-8")
-                    print(code)
                     for j in db.execute(f"SELECT count(*) FROM problems WHERE pid='{pid}' AND site='Codeforces';"):
                         cnt = j[0]
                     if cnt == 0:
-                        print(f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'Codeforces', '{code}');")
+                        self.LOGGER.log(10, f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'Codeforces', '{code}');")
                         db.execute(
                             f"INSERT INTO problems (pid, site, code) VALUES ('{pid}', 'Codeforces', '{code}');")
                         db.commit()
 
-            print("Done with Codeforces")
+            self.LOGGER.log(30, "Done with Codeforces")
         except Exception:
             traceback.print_exc()

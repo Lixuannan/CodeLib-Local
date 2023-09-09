@@ -5,6 +5,7 @@ import sqlite3
 
 import pyperclip
 from PySide6.QtWidgets import QApplication, QWidget, QDialog
+from PySide6.QtGui import QShortcut, QKeySequence
 
 import syncer
 import ui.show_problem
@@ -79,7 +80,7 @@ def search():
 
 def show_settings():
     for i in settings:
-        print(f"{i}: {settings[i]}")
+        LOGGER.log(10, f"{i}: {settings[i]}")
 
 
 class ShowProblem(ui.show_problem.Ui_show_problem, QDialog):
@@ -92,8 +93,8 @@ class ShowProblem(ui.show_problem.Ui_show_problem, QDialog):
         self.pid.setText(self.pidT)
         self.site.setText(self.siteT)
 
-        print(self.siteT)
-        print(self.pidT)
+        LOGGER.log(10, self.siteT)
+        LOGGER.log(10, self.pidT)
 
         for i in db.execute(f"SELECT * FROM problems WHERE pid = '{self.pidT}' AND site = '{self.siteT}';"):
             self.codeT = base64.b32decode(i[2].encode("utf-8")).decode("utf-8")
@@ -109,7 +110,7 @@ class ShowProblem(ui.show_problem.Ui_show_problem, QDialog):
 
 class Setting(setting.Ui_settingPage, QDialog):
     def __init__(self):
-        print(settings)
+        LOGGER.log(10, str(settings))
         super(Setting, self).__init__()
         self.setupUi(self)
         self.resetDbButton.clicked.connect(
@@ -139,7 +140,7 @@ class Setting(setting.Ui_settingPage, QDialog):
 
         save_settings()
         self.close()
-        print(settings)
+        LOGGER.log(20, str(settings))
         p = sys.executable
         os.execl(p, p, *sys.argv)
         sys.exit(0)
@@ -170,16 +171,16 @@ class Massage(massage.Ui_massagePage, QDialog):
 
         if accept is not None:
             self.massageButtonBox.accepted.connect(lambda: (self.close(), accept()))
-            print("self.accepted Connected to customize function")
+            LOGGER.log(10, "self.accepted Connected to customize function")
         else:
             self.massageButtonBox.accepted.connect(self.accept)
-            print("self.accepted Connected to default self.accept")
+            LOGGER.log(10, "self.accepted Connected to default self.accept")
         if reject is not None:
             self.massageButtonBox.rejected.connect(lambda: (self.close(), reject()))
-            print("self.rejected Connected to customize function")
+            LOGGER.log(10, "self.rejected Connected to customize function")
         else:
             self.massageButtonBox.rejected.connect(self.reject)
-            print("self.rejected Connected to default self.reject")
+            LOGGER.log(10, "self.rejected Connected to default self.reject")
 
         self.massageBrowser.setText(massage_text)
         self.exec()
@@ -192,7 +193,7 @@ class Log:
 
 class ChooseOJ(chooseOJ.Ui_chooseOJ, QDialog):
     def __init__(self):
-        print(default_site)
+        LOGGER.log(10, str(default_site))
         super(ChooseOJ, self).__init__()
         self.setupUi(self)
         self.buttonBox.accepted.connect(self.sync)
@@ -272,9 +273,9 @@ if __name__ == '__main__':
     cursor = db.execute("SELECT * FROM default_sync")
     for i in cursor:
         default_site[i[0]] = i[1]
-    print(f"Default site: {default_site}")
+    LOGGER.log(10, f"Default site: {default_site}")
 
-    s = syncer.Syncer(settings)
+    s = syncer.Syncer(settings, LOGGER)
 
     if settings["loginWhenStartup"]:
         if settings["oiclassUsername"] != '':
@@ -295,6 +296,14 @@ if __name__ == '__main__':
     main_widget.refresh.clicked.connect(load_list)
     main_widget.keyword.returnPressed.connect(search)
     main_widget.problems.doubleClicked.connect(lambda: ShowProblem(main_widget.problems.selectedItems()[0].text()))
+
+    log_widget = QWidget()
+    log_window = log.Ui_log()
+    log_window.setupUi(log_widget)
+    log_window.refresh.clicked.connect(lambda: log_window.logBrowser.setText(LOGGER.allLogs))
+
+    show_log_shortcut = QShortcut(QKeySequence("Ctrl+l"), widget)
+    show_log_shortcut.activated.connect(lambda: log_widget.show())
 
     load_list()
 
