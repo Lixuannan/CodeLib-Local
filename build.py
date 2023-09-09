@@ -6,8 +6,8 @@ for i in os.popen("pyinstaller -y -D -w -n CodeLib-Local -i icon\\icon.ico --cle
     print(i)
 
 s = ""
-for root, dirs, files in os.walk("G:\\Project\\CodeLib-Local\\dist\\CodeLib-Local"):
-    x = root.replace('G:\\Project\\CodeLib-Local\\dist\\CodeLib-Local', '')
+for root, dirs, files in os.walk("F:\\Project\\CodeLib-Local\\dist\\CodeLib-Local"):
+    x = root.replace('F:\\Project\\CodeLib-Local\\dist\\CodeLib-Local', '')
     for file in files:
         t = f"Source: \"{os.path.join(root, file)}\"; DestDir: " + "\"{app}" + f"{x}\";"
         s += t + '\n'
@@ -36,13 +36,13 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
-LicenseFile=G:\\Project\\CodeLib-Local\\LICENSE
+LicenseFile=F:\\Project\\CodeLib-Local\\LICENSE
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=G:\\Project\\CodeLib-Local\dist
+OutputDir=F:\\Project\\CodeLib-Local\\dist
 OutputBaseFilename=CodeLib-Local-Setup-Win
-SetupIconFile=G:\\Project\\CodeLib-Local\\icon\\icon.ico
+SetupIconFile=F:\\Project\\CodeLib-Local\\icon\\icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
