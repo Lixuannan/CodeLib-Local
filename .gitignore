@@ -1,4 +1,4 @@
-data.data
+data.db
 .DS_Store
 .idea
 dist
@@ -6,3 +6,4 @@ build
 venv
 ._*
 CodeLib-Local.spec
+log.txt
