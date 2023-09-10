@@ -80,7 +80,8 @@ def search():
 
 def show_settings():
     for i in settings:
-        LOGGER.log(10, f"{i}: {settings[i]}")
+        if 'Password' not in i:
+            LOGGER.log(10, f"{i}: {settings[i]}")
 
 
 class ShowProblem(ui.show_problem.Ui_show_problem, QDialog):
@@ -304,6 +305,24 @@ if __name__ == '__main__':
 
     show_log_shortcut = QShortcut(QKeySequence("Ctrl+l"), widget)
     show_log_shortcut.activated.connect(lambda: log_widget.show())
+
+    refresh_shortcut_main_1 = QShortcut(QKeySequence("f5"), widget)
+    refresh_shortcut_main_1.activated.connect(load_list)
+
+    refresh_shortcut_log_1 = QShortcut(QKeySequence("f5"), log_widget)
+    refresh_shortcut_log_1.activated.connect(lambda: log_window.logBrowser.setText(LOGGER.allLogs))
+
+    refresh_shortcut_main_2 = QShortcut(QKeySequence("Ctrl+r"), widget)
+    refresh_shortcut_main_2.activated.connect(load_list)
+
+    refresh_shortcut_log_2 = QShortcut(QKeySequence("Ctrl+r"), log_widget)
+    refresh_shortcut_log_2.activated.connect(lambda: log_window.logBrowser.setText(LOGGER.allLogs))
+
+    setting_shortcut = QShortcut(QKeySequence("Ctrl+,"), widget)
+    setting_shortcut.activated.connect(lambda: Setting())
+
+    sync_shortcut = QShortcut(QKeySequence("Ctrl+s"), widget)
+    sync_shortcut.activated.connect(lambda: ChooseOJ())
 
     load_list()
 
