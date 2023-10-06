@@ -24,5 +24,5 @@ class Logger:
 
     def log(self, level: int, content: str):
         self.logger.log(level=level, msg=content)
-        with open("log.txt", "rt") as f:
+        with open("log.txt", "rt", encoding="utf-8") as f:
             self.allLogs = f.read()

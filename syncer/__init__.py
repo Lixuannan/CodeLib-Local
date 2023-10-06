@@ -32,7 +32,7 @@ class Syncer:
         }
         self.oiclass_domain = {}
         self.hydrooj_domain = {}
-        self.pool = ThreadPoolExecutor(max_workers=4)
+        self.pool = ThreadPoolExecutor(max_workers=1)
         self.settings = settings
         self.LOGGER = LOGGER
 
