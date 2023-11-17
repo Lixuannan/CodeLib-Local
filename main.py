@@ -1,8 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import base64
 import sys
 import os.path
 import sqlite3
 import shutil
+import platform
 
 import pyperclip
 from PySide6.QtWidgets import QApplication, QWidget, QDialog
@@ -257,15 +260,35 @@ class ChooseOJ(chooseOJ.Ui_chooseOJ, QDialog):
 
 
 if __name__ == '__main__':
+    slash = '/'
+
+    if platform.system() == 'Windows':
+        slash = '\\'
+
+    db_location = os.path.join(os.getenv('APPDATA'), 'CodeLib-Local', 'data.db')
+    db_template_location = ""
+    db_template_location_l = os.path.join(os.path.abspath(sys.argv[0]))
+
+    if '/' in db_template_location_l:
+        db_template_location_l = db_template_location_l.split('/')
+    if '\\' in db_template_location_l:
+        db_template_location_l = db_template_location_l.split('\\')
+
+    for i in range(len(db_template_location_l) - 1):
+        db_template_location += db_template_location_l[i] + slash
+
     if not os.path.isdir(os.path.join(os.getenv('APPDATA'), "CodeLib-Local")):
         os.mkdir(os.path.join(os.getenv('APPDATA'), "CodeLib-Local"))
 
-    if not os.path.isfile("data.db"):
-        shutil.copy("data.db.template", os.path.join(os.getenv('APPDATA'), "CodeLib-Local", "log.txt"))
+    if not os.path.isfile(db_location):
+        shutil.copy(os.path.join(db_template_location, "data.db.template"), db_location)
 
     settings = {}
     default_site = {}
-    db = sqlite3.connect("data.db")
+
+    LOGGER.log(10, f"DB location: {db_location}")
+
+    db = sqlite3.connect(db_location)
     cursor = db.execute("SELECT * FROM settings")
     for i in cursor:
         value = None
