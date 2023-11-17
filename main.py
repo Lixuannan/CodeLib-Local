@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import base64
 import sys
 import os.path
@@ -257,15 +259,20 @@ class ChooseOJ(chooseOJ.Ui_chooseOJ, QDialog):
 
 
 if __name__ == '__main__':
+    db_location = os.path.join(os.getenv('APPDATA'), 'CodeLib-Local', 'data.db')
+
     if not os.path.isdir(os.path.join(os.getenv('APPDATA'), "CodeLib-Local")):
         os.mkdir(os.path.join(os.getenv('APPDATA'), "CodeLib-Local"))
 
-    if not os.path.isfile("data.db"):
-        shutil.copy("data.db.template", os.path.join(os.getenv('APPDATA'), "CodeLib-Local", "log.txt"))
+    if not os.path.isfile(db_location):
+        shutil.copy("data.db.template", db_location)
 
     settings = {}
     default_site = {}
-    db = sqlite3.connect("data.db")
+
+    LOGGER.log(10, f"DB location: {db_location}")
+
+    db = sqlite3.connect(db_location)
     cursor = db.execute("SELECT * FROM settings")
     for i in cursor:
         value = None
