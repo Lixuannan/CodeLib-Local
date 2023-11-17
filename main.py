@@ -2,6 +2,7 @@ import base64
 import sys
 import os.path
 import sqlite3
+import shutil
 
 import pyperclip
 from PySide6.QtWidgets import QApplication, QWidget, QDialog
@@ -256,8 +257,11 @@ class ChooseOJ(chooseOJ.Ui_chooseOJ, QDialog):
 
 
 if __name__ == '__main__':
+    if not os.path.isdir(os.path.join(os.getenv('APPDATA'), "CodeLib-Local")):
+        os.mkdir(os.path.join(os.getenv('APPDATA'), "CodeLib-Local"))
+
     if not os.path.isfile("data.db"):
-        os.rename("data.db.template", "data.db")
+        shutil.copy("data.db.template", os.path.join(os.getenv('APPDATA'), "CodeLib-Local", "log.txt"))
 
     settings = {}
     default_site = {}

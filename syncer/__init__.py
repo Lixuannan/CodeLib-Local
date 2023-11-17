@@ -153,11 +153,13 @@ class Syncer:
             for i in record_urls:
                 self.LOGGER.log(10, f"http://www.oiclass.com{i}")
                 page = self.sessions["Oiclass"].get(f"http://www.oiclass.com{i}").text
-                if "Oops!" in page or "앗..!" in page:
+                retry = 0
+                while "Oops!" in page or "앗..!" in page and retry < 3:
                     if "View hidden problems" in page:
-                        continue
+                        break
                     else:
-                        time.sleep(10)
+                        time.sleep(5)
+                        retry += 1
                         page = self.sessions["Oiclass"].get(f"http://www.oiclass.com{i}").text
                 soup = BeautifulSoup(features="lxml", markup=page)
                 pid = ""
