@@ -1,20 +1,25 @@
 # -*- coding: utf-8 -*-
 
 import base64
+import json
 import sys
-import os.path
+import os
 import sqlite3
 import shutil
+import socket
 import platform
+from threading import Thread
 
+import requests
 import pyperclip
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QApplication, QWidget, QDialog
 from PySide6.QtGui import QShortcut, QKeySequence
 
 import syncer
 import ui.show_problem
 from logger import Logger
-from ui import main_window, setting, chooseOJ, massage, log
+from ui import main_window, setting, chooseOJ, massage, log, update
 
 RESET_SQL = ("DROP TABLE problems; DROP TABLE settings; DROP TABLE default_sync; CREATE TABLE problems( pid text, "
              "site text, code text); CREATE TABLE settings( option TEXT, value TEXT, number_i INT, number_f FLOAT); "
@@ -28,6 +33,7 @@ RESET_SQL = ("DROP TABLE problems; DROP TABLE settings; DROP TABLE default_sync;
              "default_sync VALUES('Oiclass',0); INSERT INTO default_sync VALUES('HydroOJ',0); INSERT INTO "
              "default_sync VALUES('UOJ',0); INSERT INTO default_sync VALUES('Codeforces',0);")
 LOGGER = Logger()
+VERSION = "v1.1.4"
 
 
 def load_list():
@@ -196,6 +202,39 @@ class Log:
         LOGGER.show()
 
 
+class Update(update.Ui_UpdateDialog, QDialog):
+    update_progress = Signal(int)
+    finish = Signal()
+
+    def __init__(self, update_url):
+        super(Update, self).__init__()
+        self.setupUi(self)
+        self.update_url = update_url
+        self.update_progress.connect(self.downloadProgress.setValue)
+        self.ifUpdate.accepted.connect(self.update)
+        self.ifUpdate.rejected.connect(self.close)
+        self.finish.connect(self.close)
+        self.exec()
+
+    def download(self, url):
+        LOGGER.log(20, f"Start Downloading from {self.update_url}")
+        with open(os.path.join(os.getenv("APPDATA"), "CodeLib-Local", self.update_url.split("/")[-1]), "wb") as f:
+            r = requests.get(self.update_url, stream=True)
+            size = r.headers.get("content-length")
+            for data in r.iter_content(chunk_size=1048576):
+                f.write(data)
+                self.update_progress.emit(int(f.tell() / int(size) * 100))
+        LOGGER.log(20, "Finish Downloading")
+        self.finish.emit()
+
+    def update(self):
+        self.downloadProgress.setEnabled(True)
+        self.progressLabel.setEnabled(True)
+
+        download_thread = Thread(target=self.download, args=(self.update_url,))
+        download_thread.start()
+
+
 class ChooseOJ(chooseOJ.Ui_chooseOJ, QDialog):
     def __init__(self):
         LOGGER.log(10, str(default_site))
@@ -203,7 +242,6 @@ class ChooseOJ(chooseOJ.Ui_chooseOJ, QDialog):
         self.setupUi(self)
         self.buttonBox.accepted.connect(self.sync)
         self.load_default_sites()
-
         self.exec()
 
     def load_default_sites(self):
@@ -264,6 +302,25 @@ if __name__ == '__main__':
 
     if platform.system() == 'Windows':
         slash = '\\'
+
+    region = requests.get(f"https://ipapi.co/{requests.get('https://ipapi.co/ip/').text}/country_code").text
+    LOGGER.log(10, f"Region: {region}")
+    if region == 'CN':
+        result = json.loads(requests.get("https://gitee.com/api/v5/repos/lixuannan/CodeLib-Local/releases/latest").text)
+        tag = result["tag_name"]
+        url = result["assets"]
+    else:
+        result = json.loads(requests.get("https://api.github.com/repos/lixuannan/CodeLib-Local/releases/latest").text)
+        tag = result["tag_name"]
+        url = result["assets"]
+
+    update_url = ""
+    if tag != VERSION:
+        if platform.system() == 'Windows':
+            for i in url:
+                if "name" in i and i["name"] == f"CodeLib-Local-Setup-{tag}.exe":
+                    update_url = i["browser_download_url"]
+                    break
 
     db_location = os.path.join(os.getenv('APPDATA'), 'CodeLib-Local', 'data.db')
     db_template_location = ""
@@ -352,6 +409,11 @@ if __name__ == '__main__':
     sync_shortcut.activated.connect(lambda: ChooseOJ())
 
     load_list()
+
+    if update_url != "":
+        Update(update_url)
+        os.system(f"\"{os.path.join(os.getenv('APPDATA'), 'CodeLib-Local', update_url.split('/')[-1])}\"")
+        sys.exit(0)
 
     widget.show()
     sys.exit(app.exec())
