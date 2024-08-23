@@ -34,6 +34,7 @@ RESET_SQL = ("DROP TABLE problems; DROP TABLE settings; DROP TABLE default_sync;
              "default_sync VALUES('UOJ',0); INSERT INTO default_sync VALUES('Codeforces',0);")
 LOGGER = Logger()
 VERSION = "v1.1.4"
+DATA_ROOT = os.path.join(os.getenv['APPDATA'], "CodeLib-Local") if platform.system() == "Windows" else os.path.join(os.getenv("HOME"), ".local/share/")
 
 
 def load_list():
@@ -218,7 +219,7 @@ class Update(update.Ui_UpdateDialog, QDialog):
 
     def download(self, url):
         LOGGER.log(20, f"Start Downloading from {self.update_url}")
-        with open(os.path.join(os.getenv("APPDATA"), "CodeLib-Local", self.update_url.split("/")[-1]), "wb") as f:
+        with open(os.path.join(DATA_ROOT, "CodeLib-Local", self.update_url.split("/")[-1]), "wb") as f:
             r = requests.get(self.update_url, stream=True)
             size = r.headers.get("content-length")
             for data in r.iter_content(chunk_size=1048576):
@@ -322,7 +323,7 @@ if __name__ == '__main__':
                     update_url = i["browser_download_url"]
                     break
 
-    db_location = os.path.join(os.getenv('APPDATA'), 'CodeLib-Local', 'data.db')
+    db_location = os.path.join(DATA_ROOT, 'CodeLib-Local', 'data.db')
     db_template_location = ""
     db_template_location_l = os.path.join(os.path.abspath(sys.argv[0]))
 
@@ -334,8 +335,8 @@ if __name__ == '__main__':
     for i in range(len(db_template_location_l) - 1):
         db_template_location += db_template_location_l[i] + slash
 
-    if not os.path.isdir(os.path.join(os.getenv('APPDATA'), "CodeLib-Local")):
-        os.mkdir(os.path.join(os.getenv('APPDATA'), "CodeLib-Local"))
+    if not os.path.isdir(os.path.join(DATA_ROOT, "CodeLib-Local")):
+        os.mkdir(os.path.join(DATA_ROOT, "CodeLib-Local"))
 
     if not os.path.isfile(db_location):
         shutil.copy(os.path.join(db_template_location, "data.db.template"), db_location)
@@ -412,7 +413,7 @@ if __name__ == '__main__':
 
     if update_url != "":
         Update(update_url)
-        os.system(f"\"{os.path.join(os.getenv('APPDATA'), 'CodeLib-Local', update_url.split('/')[-1])}\"")
+        os.system(f"\"{os.path.join(DATA_ROOT, 'CodeLib-Local', update_url.split('/')[-1])}\"")
         sys.exit(0)
 
     widget.show()
