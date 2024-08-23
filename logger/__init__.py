@@ -8,20 +8,20 @@ import platform
 class Logger:
     def __init__(self):
         if platform.system() == "Windows":
-            data_root = os.getenv("APPDATA")
+            self.data_root = os.getenv("APPDATA")
         else:
-            data_root = os.path.join(os.getenv("HOME"), ".local/share/")
+            self.data_root = os.path.join(os.getenv("HOME"), ".local/share/")
 
-        if not os.path.isdir(os.path.join(data_root, "CodeLib-Local")):
-            os.mkdir(os.path.join(data_root, "CodeLib-Local"))
+        if not os.path.isdir(os.path.join(self.data_root, "CodeLib-Local")):
+            os.mkdir(os.path.join(self.data_root, "CodeLib-Local"))
 
-        open(os.path.join(data_root, "CodeLib-Local", "log.txt"), "w")
+        open(os.path.join(self.data_root, "CodeLib-Local", "log.txt"), "w")
 
         self.logger = logging.getLogger("CodeLib-Local Logger")
 
         self.format = "[%(asctime)s - %(levelname)s]  %(message)s"
 
-        self.file_handler = logging.FileHandler(os.path.join(data_root, "CodeLib-Local", "log.txt"), "w", encoding='utf-8')
+        self.file_handler = logging.FileHandler(os.path.join(self.data_root, "CodeLib-Local", "log.txt"), "w", encoding='utf-8')
         self.stream_handler = logging.StreamHandler()
         self.file_handler.setLevel(logging.DEBUG)
         self.stream_handler.setLevel(logging.DEBUG)
@@ -36,5 +36,5 @@ class Logger:
 
     def log(self, level: int, content: str):
         self.logger.log(level=level, msg=content)
-        with open(os.path.join(data_root, "CodeLib-Local", "log.txt"), "rt", encoding="utf-8") as f:
+        with open(os.path.join(self.data_root, "CodeLib-Local", "log.txt"), "rt", encoding="utf-8") as f:
             self.allLogs = f.read()
